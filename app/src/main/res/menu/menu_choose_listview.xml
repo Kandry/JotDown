@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/menugroup">
+        <item
+            android:id="@+id/menu_list_view"
+            android:icon="@android:drawable/ic_menu_sort_by_size"
+            android:title="@string/menu_list_view_text"/>
+        <item
+            android:id="@+id/menu_cardlist_view"
+            android:icon="@android:drawable/ic_menu_agenda"
+            android:title="@string/menu_cardlist_view_text"/>
+    </group>
+</menu>
