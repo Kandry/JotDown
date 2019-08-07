@@ -2,10 +2,8 @@ package com.kozyrev.jotdown_room;
 
 import android.arch.persistence.room.Room;
 import android.content.Intent;
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -18,25 +16,15 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 
-import org.reactivestreams.Subscription;
-
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
 
 import io.reactivex.Flowable;
-import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.DisposableSubscriber;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
@@ -44,8 +32,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerView notesRecycler;
 
     private List<Note> notesList = null;
-    private CaptionedImagesAdapter adapter;
-
     boolean isCard = true;
 
     NoteDB db;
@@ -73,7 +59,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler = (RecyclerView) findViewById(R.id.notes_recycler);
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, 1);
         notesRecycler.setLayoutManager(layoutManager);
-        createAdapter();
     }
 
     @Override
@@ -145,7 +130,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onNext(List<Note> listNote) {
                         Log.i("RxTest", "Next");
                         notesList = listNote;
-                        adapter.updateNotesList(listNote);
+                        createAdapter();
                     }
 
                     @Override
@@ -180,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void createAdapter(){
-        adapter = new CaptionedImagesAdapter(notesList, isCard);
+        CaptionedImagesAdapter adapter = new CaptionedImagesAdapter(notesList, isCard);
         notesRecycler.setAdapter(adapter);
 
         adapter.setListener(new CaptionedImagesAdapter.Listener() {

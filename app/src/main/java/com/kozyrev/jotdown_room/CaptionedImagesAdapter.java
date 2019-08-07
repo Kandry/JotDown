@@ -1,8 +1,6 @@
 package com.kozyrev.jotdown_room;
 
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -12,6 +10,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.kozyrev.jotdown_room.DB.Note;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         this.notes = notes;
         this.isCard = isCard;
     }
-
+/*
     public void updateNotesList(List<Note> notes){
         if (this.notes != null) {
             this.notes.clear();
@@ -34,7 +33,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
             this.notes = notes;
         }
         this.notifyDataSetChanged();
-    }
+    }*/
 
     @Override
     public int getItemCount(){
@@ -50,20 +49,25 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position){
         CardView cardView = holder.cardView;
+
         Note note = notes.get(position);
 
         textViewSetText(cardView, R.id.info_name, note.getName());
         textViewSetText(cardView, R.id.info_description, note.getDescription());
 
         ImageView imageView = (ImageView)cardView.findViewById(R.id.info_image);
+        imageView.setImageURI(null);
 
         if (note.getImageResourceUri() != null && isCard) {
             imageView.getLayoutParams().height = (int) imageView.getResources().getDimension(R.dimen.imageview_height);
             Uri imageUri = Uri.parse(note.getImageResourceUri());
-            imageView.setImageURI(imageUri);
+            Picasso.get()
+                    .load(imageUri)
+                    .resize(800, 450)
+                    .centerCrop()
+                    .into(imageView);
             imageView.setContentDescription(note.getName());
         } else {
-            imageView.setImageURI(null);
             imageView.getLayoutParams().height = (int) imageView.getResources().getDimension(R.dimen.imageview_height_null);
         }
 

@@ -13,4 +13,6 @@
     <string name="note_description_hit">Description</string>
     <string name="action_create_notify">Create notify</string>
     <string name="action_search">Search</string>
+    <string name="action_add_image">Add image</string>
+    <string name="action_add_alarm">Add alarm</string>
 </resources>
