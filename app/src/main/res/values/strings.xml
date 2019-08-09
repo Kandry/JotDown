@@ -16,4 +16,5 @@
     <string name="action_add_image">Add image</string>
     <string name="action_add_alarm">Add alarm</string>
     <string name="hint_search">Search text</string>
+    <string name="action_add_photo">Add photo</string>
 </resources>

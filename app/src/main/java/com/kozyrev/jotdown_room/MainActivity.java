@@ -99,11 +99,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.inflate(R.menu.menu_choose_listview);
 
-        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                switch(item.getItemId()) {
+        popupMenu.setOnMenuItemClickListener(menuItem -> {
+                switch(menuItem.getItemId()) {
                     case R.id.menu_list_view:
                         if(isCard) {
                             isCard = false;
@@ -120,7 +117,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         break;
                 }
                 return true;
-            }
         });
         popupMenu.show();
     }
@@ -147,12 +143,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
 
                     @Override
-                    public void onError(Throwable t) {
-                    }
+                    public void onError(Throwable t) {}
 
                     @Override
-                    public void onComplete() {
-                    }
+                    public void onComplete() {}
                 });
     }
 
@@ -197,13 +191,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             setEditTextLayoutParams(params, (int) getResources().getDimension(R.dimen.searchEditText_height), (int) getResources().getDimension(R.dimen.margin_top));
             searchEditText.addTextChangedListener(new TextWatcher() {
                 @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                }
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
                 @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {
-
-                }
+                public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
                 @Override
                 public void afterTextChanged(Editable s) {
@@ -233,8 +224,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         MaybeObserver<List<Note>> observer = new MaybeObserver<List<Note>>() {
             @Override
-            public void onSubscribe(@NonNull Disposable d) {
-            }
+            public void onSubscribe(@NonNull Disposable d) {}
 
             @Override
             public void onSuccess(@NonNull List<Note> listNote) {
@@ -243,12 +233,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
             @Override
-            public void onError(@NonNull Throwable e) {
-            }
+            public void onError(@NonNull Throwable e) {}
 
             @Override
-            public void onComplete() {
-            }
+            public void onComplete() {}
         };
         notesMaybe.subscribe(observer);
     }

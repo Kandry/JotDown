@@ -26,7 +26,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         this.isCard = isCard;
     }
 
-/*
+
     public void updateNotesList(List<Note> notes, boolean isCard){
         if (this.notes != null) {
             this.notes.clear();
@@ -36,7 +36,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         }
         this.isCard = isCard;
         this.notifyDataSetChanged();
-    }*/
+    }
 
     @Override
     public long getItemId(int position) {
@@ -53,16 +53,16 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.card_captioned_image, parent, false);
         ViewHolder viewHolder = new ViewHolder(cardView) {};
 
-        cardView.setOnClickListener(v -> {
+        cardView.setOnClickListener((v) -> {
             int adapterPosition = viewHolder.getAdapterPosition();
-            if (adapterPosition != RecyclerView.NO_POSITION) {
+            if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
                 listener.onClick(adapterPosition);
             }
         });
 
         cardView.setOnLongClickListener(v -> {
             int adapterPosition = viewHolder.getAdapterPosition();
-            if (adapterPosition != RecyclerView.NO_POSITION) {
+            if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
                 listener.onLongClick(adapterPosition);
             }
             return true;
