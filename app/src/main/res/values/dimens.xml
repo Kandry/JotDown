@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="imageview_height_null">0dp</dimen>
+    <dimen name="height_null">0dp</dimen>
     <dimen name="imageview_height">200dp</dimen>
+    <dimen name="searchEditText_height">40dp</dimen>
+    <dimen name="margin_top">2dp</dimen>
 </resources>

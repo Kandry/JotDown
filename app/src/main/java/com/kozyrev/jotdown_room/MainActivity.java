@@ -12,10 +12,14 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.DB.Note;
@@ -24,15 +28,20 @@ import com.kozyrev.jotdown_room.DB.NoteDB;
 import java.util.List;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.subscribers.DisposableSubscriber;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
 
     RecyclerView notesRecycler;
+    EditText searchEditText;
 
     private List<Note> notesList = null;
     boolean isCard = true;
+    boolean isSearch = false;
 
     NoteDB db;
 
@@ -70,10 +79,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
-            case R.id.action_create_note:
-                addNewNote();
-                return true;
             case R.id.action_search:
+                createSearch();
                 return true;
             case R.id.action_choose_list_view:
                 showPopupMenu(findViewById(R.id.action_choose_list_view));
@@ -99,14 +106,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 switch(item.getItemId()) {
                     case R.id.menu_list_view:
                         if(isCard) {
-                            isCard = !isCard;
+                            isCard = false;
                             createAdapter();
                         }
                         Log.i("RxTest", "isCard " + isCard);
                         break;
                     case R.id.menu_cardlist_view:
                         if(!isCard) {
-                            isCard = !isCard;
+                            isCard = true;
                             createAdapter();
                         }
                         Log.i("RxTest", "isCard " + isCard);
@@ -121,16 +128,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStart() {
         super.onStart();
-        Flowable<List<Note>> notesList1 = db.getNoteDAO().getAllNotesFlowable();
-        notesList1
+        flowableAllNotes();
+    }
+
+    private void flowableAllNotes(){
+        Flowable<List<Note>> notesAllList = db.getNoteDAO().getAllNotesFlowable();
+        notesAllList
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSubscriber<List<Note>>() {
 
                     @Override
                     public void onNext(List<Note> listNote) {
                         Log.i("RxTest", "Next");
-                        notesList = listNote;
-                        createAdapter();
+                        if (!isSearch) {
+                            notesList = listNote;
+                            createAdapter();
+                        }
                     }
 
                     @Override
@@ -141,16 +154,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onComplete() {
                     }
                 });
-    }
-
-    @Override
-    protected void onResume(){
-        super.onResume();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
     }
 
     public void onClickAdd(View view) {
@@ -183,5 +186,70 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void createSearch(){
+        isSearch = !isSearch;
+        searchEditText = (EditText) findViewById(R.id.searchEditText);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) searchEditText.getLayoutParams();
+
+        if(isSearch) {
+            setEditTextLayoutParams(params, (int) getResources().getDimension(R.dimen.searchEditText_height), (int) getResources().getDimension(R.dimen.margin_top));
+            searchEditText.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                }
+
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                }
+
+                @Override
+                public void afterTextChanged(Editable s) {
+                    String searchText = searchEditText.getText().toString();
+                    maybeSearchNotes(searchText);
+                }
+            });
+            Log.i("TEST", "search");
+        } else {
+            int nullDimen = (int) getResources().getDimension(R.dimen.height_null);
+            setEditTextLayoutParams(params, nullDimen, nullDimen);
+            searchEditText.setText("");
+            Log.i("TEST", "!search");
+            flowableAllNotes();
+        }
+
+        searchEditText.setLayoutParams(params);
+    }
+
+    private void setEditTextLayoutParams(LinearLayout.LayoutParams params, int height, int topMargin){
+        params.height = height;
+        params.topMargin = topMargin;
+    }
+
+    private void maybeSearchNotes(String searchText){
+        Maybe<List<Note>> notesMaybe = db.getNoteDAO().getAllNotesBySearchText(searchText);
+
+        MaybeObserver<List<Note>> observer = new MaybeObserver<List<Note>>() {
+            @Override
+            public void onSubscribe(@NonNull Disposable d) {
+            }
+
+            @Override
+            public void onSuccess(@NonNull List<Note> listNote) {
+                notesList = listNote;
+                createAdapter();
+            }
+
+            @Override
+            public void onError(@NonNull Throwable e) {
+            }
+
+            @Override
+            public void onComplete() {
+            }
+        };
+        notesMaybe.subscribe(observer);
     }
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Flowable;
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 @Dao
@@ -39,6 +40,6 @@ public interface NoteDAO {
     @Query("SELECT * FROM NOTES")
     Flowable<List<Note>> getAllNotesFlowable();
 
-    @Query("SELECT * FROM NOTES WHERE name LIKE '%' || :name || '%'")
-    List<Note> getAllNotesBySearchName(String name);
+    @Query("SELECT * FROM NOTES WHERE name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%'")
+    Maybe<List<Note>> getAllNotesBySearchText(String text);
 }

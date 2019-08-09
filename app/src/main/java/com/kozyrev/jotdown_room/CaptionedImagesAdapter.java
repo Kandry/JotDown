@@ -3,6 +3,7 @@ package com.kozyrev.jotdown_room;
 import android.net.Uri;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,16 +25,23 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         this.notes = notes;
         this.isCard = isCard;
     }
+
 /*
-    public void updateNotesList(List<Note> notes){
+    public void updateNotesList(List<Note> notes, boolean isCard){
         if (this.notes != null) {
             this.notes.clear();
             this.notes.addAll(notes);
         } else {
             this.notes = notes;
         }
+        this.isCard = isCard;
         this.notifyDataSetChanged();
     }*/
+
+    @Override
+    public long getItemId(int position) {
+        return super.getItemId(position);
+    }
 
     @Override
     public int getItemCount(){
@@ -42,8 +50,25 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
 
     @Override
     public CaptionedImagesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
-        CardView cv = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.card_captioned_image, parent, false);
-        return new ViewHolder(cv);
+        CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.card_captioned_image, parent, false);
+        ViewHolder viewHolder = new ViewHolder(cardView) {};
+
+        cardView.setOnClickListener(v -> {
+            int adapterPosition = viewHolder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                listener.onClick(adapterPosition);
+            }
+        });
+
+        cardView.setOnLongClickListener(v -> {
+            int adapterPosition = viewHolder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION) {
+                listener.onLongClick(adapterPosition);
+            }
+            return true;
+        });
+
+        return viewHolder;
     }
 
     @Override
@@ -68,27 +93,8 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
                     .into(imageView);
             imageView.setContentDescription(note.getName());
         } else {
-            imageView.getLayoutParams().height = (int) imageView.getResources().getDimension(R.dimen.imageview_height_null);
+            imageView.getLayoutParams().height = (int) imageView.getResources().getDimension(R.dimen.height_null);
         }
-
-        cardView.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View v){
-                if(listener != null){
-                    listener.onClick(position);
-                }
-            }
-        });
-
-        cardView.setOnLongClickListener(new View.OnLongClickListener() {
-            @Override
-            public boolean onLongClick(View v) {
-                if(listener != null){
-                    listener.onLongClick(position);
-                }
-                return true;
-            }
-        });
     }
 
     private void textViewSetText(CardView cardView, int textViewId, String text){
@@ -100,10 +106,10 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         this.listener = listener;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    static class ViewHolder extends RecyclerView.ViewHolder{
         private CardView cardView;
 
-        public ViewHolder(CardView v){
+        ViewHolder(CardView v){
             super(v);
             cardView = v;
         }

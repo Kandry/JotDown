@@ -24,6 +24,7 @@ import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
@@ -116,8 +117,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                             .resize(800, 450)
                             .centerCrop()
                             .into(imageView);
-                    //imageView.setImageURI(null);
-                    //imageView.setImageURI(imageUri);
                     imageView.setContentDescription(note.getName());
 
                 }
@@ -139,6 +138,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             public void onClick(View v) {
                 textView.setText("");
                 openDatePickerDialog();
+            }
+        });
+
+        textView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                cancelAlarm();
+                return true;
             }
         });
     }
@@ -248,7 +255,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         datePickerDialog.show();
     }
 
-
     private void openTimePickerDialog(boolean is24hr){
         Calendar calendar = Calendar.getInstance();
 
@@ -272,5 +278,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
+    }
+
+    private void cancelAlarm(){
+        textView.setText("");
+        Toast.makeText(getApplicationContext(), "Сигнализация отменена", Toast.LENGTH_LONG).show();
+
+        Intent intent = new Intent(getApplicationContext(),  AlarmReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.cancel(pendingIntent);
     }
 }
