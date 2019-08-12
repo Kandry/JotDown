@@ -7,12 +7,11 @@ import android.arch.persistence.room.PrimaryKey;
 public class Note {
     @PrimaryKey(autoGenerate = true)
     private int uid;
-
     private String name;
-
     private String description;
-
     private String imageResourceUri;
+    private long alarmTime;
+
 
     public Note(String name, String description, String imageResourceUri){
         this.name = name;
@@ -48,7 +47,9 @@ public class Note {
         return imageResourceUri;
     }
 
-    public void setImageResourceUri(String imageResourceUri) {
-        this.imageResourceUri = imageResourceUri;
-    }
+    public void setImageResourceUri(String imageResourceUri) { this.imageResourceUri = imageResourceUri; }
+
+    public long getAlarmTime(){ return alarmTime; }
+
+    public void setAlarmTime(long alarmTime) { this.alarmTime = alarmTime; }
 }

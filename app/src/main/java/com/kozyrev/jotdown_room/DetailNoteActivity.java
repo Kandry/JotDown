@@ -24,10 +24,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -63,18 +63,19 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private TextInputEditText title;
     private TextInputEditText description;
     private ImageView imageView;
-    private TextView textView;
+    private TextView alarmTextView;
     private Calendar calendar = Calendar.getInstance();
     private ShareActionProvider shareActionProvider;
 
     private int noteId;
     private String imageUriString;
     private boolean notImageAdding = true;
+    private boolean isAlarmUpdating = false;
     private Uri cameraImageUri;
     Uri originalUri;
+    private Date alarmTime;
 
     /* ACTIVITY_LIFE_CYCLE --------------- Взаимодействия с жизненным циклом активности ---------------------------------- */
-
     @Override
     protected void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
@@ -111,9 +112,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         title = (TextInputEditText) findViewById(R.id.textTitle);
         description = (TextInputEditText) findViewById(R.id.textDescription);
         imageView = (ImageView) findViewById(R.id.imageNote);
+        alarmTextView = (TextView) findViewById(R.id.textViewAlarmPrompt);
 
         Single<Note> noteSingle = db.getNoteDAO().getSingleNoteById(noteId);
-
         SingleObserver<Note> observer = new SingleObserver<Note>() {
             @Override
             public void onSubscribe(Disposable d) {}
@@ -133,6 +134,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                             .into(imageView);
                     imageView.setContentDescription(note.getName());
                 }
+                if (note.getAlarmTime() != 0){
+                    alarmTime = new Date(note.getAlarmTime());
+                    if (alarmTime.compareTo(new Date()) < 1) {
+                        cancelAlarm(alarmTime.toString());
+                        alarmTextView.setText("");
+                    } else {
+                        alarmTextView.setText(alarmTime.toString());
+                    }
+                }
             }
 
             @Override
@@ -140,13 +150,16 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                 e.printStackTrace();
             }
         };
-
         noteSingle.subscribe(observer);
 
-        textView = (TextView) findViewById(R.id.textViewAlarmPrompt);
+        alarmTextView.setOnClickListener(v -> {
+            updateAlarm();
+        });
 
-        textView.setOnLongClickListener(v -> {
-                cancelAlarm();
+        alarmTextView.setOnLongClickListener(v -> {
+                cancelAlarm(alarmTextView.getText().toString());
+                alarmTextView.setText("");
+                Toast.makeText(getApplicationContext(), "Сигнализация отменена", Toast.LENGTH_LONG).show();
                 return true;
             });
     }
@@ -176,8 +189,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
             case R.id.action_create_notify:
-                textView.setText("");
-                openDatePickerDialog();
+                alarmTextView.setText("");
+                openDatePickerDialog(null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -308,6 +321,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* DATABASE ------------------------------------- Взаимодействия с БД ----------------------------------------------- */
     private void addNote(){
         Note note = new Note(title.getText().toString(), description.getText().toString(), imageUriString);
+        setAlarmText(note);
         db.getNoteDAO().insert(note);
     }
 
@@ -316,7 +330,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         note.setName(title.getText().toString());
         note.setDescription(description.getText().toString());
         note.setImageResourceUri(imageUriString);
+        setAlarmText(note);
         db.getNoteDAO().update(note);
+    }
+
+    private void setAlarmText(Note note){
+        if (alarmTime.getTime() != 0){
+            note.setAlarmTime(alarmTime.getTime());
+        }
     }
     /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
 
@@ -325,7 +346,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             calendar.set(Calendar.YEAR, year);
             calendar.set(Calendar.MONTH, month);
             calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            openTimePickerDialog(true);
+            openTimePickerDialog();
     };
 
     TimePickerDialog.OnTimeSetListener onTimeSetListener = (TimePicker timePicker, int hourOfDay, int minute) -> {
@@ -336,8 +357,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             setAlarm(calendar);
     };
 
-    private void openDatePickerDialog(){
-        Calendar calendar = Calendar.getInstance();
+    private void openDatePickerDialog(Date updateDate){
+        if (updateDate != null) { calendar.setTime(updateDate); }
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(this, onDateSetListener,
                 calendar.get(Calendar.YEAR),
@@ -347,19 +368,19 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         datePickerDialog.show();
     }
 
-    private void openTimePickerDialog(boolean is24hr){
-        Calendar calendar = Calendar.getInstance();
-
+    private void openTimePickerDialog(){
         TimePickerDialog timePickerDialog = new TimePickerDialog(this, onTimeSetListener,
                 calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE), is24hr);
+                calendar.get(Calendar.MINUTE), true);
         timePickerDialog.setTitle("Выберите время");
         timePickerDialog.show();
     }
 
     private void setAlarm(Calendar targetCal){
-        textView.setText("Сигнализация установлена на ");
-        textView.append(String.valueOf(targetCal.getTime()));
+        if (isAlarmUpdating) {
+            cancelAlarm(alarmTextView.getText().toString());
+            isAlarmUpdating = false;
+        }
 
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         intent.putExtra(AlarmReceiver.EXTRA_NOTE_ID, noteId);
@@ -367,16 +388,26 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         intent.putExtra(AlarmReceiver.EXTRA_CONTENT_TEXT, description.getText().toString());
         intent.putExtra(AlarmReceiver.EXTRA_URI, imageUriString);
 
+        alarmTime = targetCal.getTime();
+        String alarmText = alarmTime.toString();
+
+        intent.setAction(alarmText);
+        alarmTextView.setText(alarmText);
+
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
 
-    private void cancelAlarm(){
-        textView.setText("");
-        Toast.makeText(getApplicationContext(), "Сигнализация отменена", Toast.LENGTH_LONG).show();
+    private void updateAlarm(){
+        isAlarmUpdating = true;
+        openDatePickerDialog(alarmTime);
+    }
 
+    private void cancelAlarm(String alarmText){
         Intent intent = new Intent(getApplicationContext(),  AlarmReceiver.class);
+        intent.setAction(alarmText);
+
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         alarmManager.cancel(pendingIntent);
