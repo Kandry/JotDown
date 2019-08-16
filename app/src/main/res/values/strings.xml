@@ -17,4 +17,7 @@
     <string name="action_add_alarm">Add alarm</string>
     <string name="hint_search">Search text</string>
     <string name="action_add_photo">Add photo</string>
+    <string name="action_add_record">Add record</string>
+    <string name="action_add_file">Add file</string>
+    <string name="alarm_canceled_message">Alarm canceled</string>
 </resources>

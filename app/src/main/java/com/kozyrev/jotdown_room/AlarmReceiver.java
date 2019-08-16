@@ -4,13 +4,16 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.SystemClock;
+import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
 import android.widget.Toast;
 
@@ -33,8 +36,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        Toast.makeText(context, "ТЕСТИРУЕМ +|+ " + intent.getStringExtra(EXTRA_CONTENT_TEXT) +  " +|+ ПАЦАНЫ", Toast.LENGTH_LONG).show();
-        showNotification(context,
+        showNotification(
+                context,
                 intent.getStringExtra(EXTRA_TITLE),
                 intent.getStringExtra(EXTRA_CONTENT_TEXT),
                 intent.getStringExtra(EXTRA_URI),
@@ -77,19 +80,26 @@ public class AlarmReceiver extends BroadcastReceiver {
     }
 
     private void setBuilderParams(NotificationCompat.Builder builder, String title, String contentText, String imageUriString, int icon){
-        Bitmap bitmap = null;/*
+        //Bitmap bitmap = null;
+        /*
         try {
             bitmap = Picasso.get().load(Uri.parse(imageUriString)).get();
         } catch (IOException ex){
             ex.printStackTrace();
         }*/
 
+        /*if (!imageUriString.equals("")) {
+            bitmap = BitmapFactory.decodeFile(imageUriString);
+            //Bitmap bitmap = MediaStore.Images.Media.getBitmap(ContentResolver.get)
+            //finalBitmap = Bitmap.createScaledBitmap(bitmap, 800, 450, false);
+        }*/
+
         builder.setSmallIcon(icon)
-                .setLargeIcon(bitmap)
+//                .setLargeIcon(bitmap)
                 .setContentTitle(title)
                 .setContentText(contentText)
+                .setWhen(System.currentTimeMillis())
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setWhen(SystemClock.currentThreadTimeMillis())
                 .setVibrate(new long[]{0, 1000})
                 .setAutoCancel(true);
     }

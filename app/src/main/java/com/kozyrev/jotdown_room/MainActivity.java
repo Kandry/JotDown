@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     RecyclerView notesRecycler;
     EditText searchEditText;
+    Toolbar toolbar;
+    DrawerLayout drawerLayout;
+    NavigationView navigationView;
 
     private List<Note> notesList = null;
     boolean isCard = true;
@@ -49,25 +52,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
+        initViews();
+        initDB();
+    }
+
+    private void initViews(){
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
-
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-
-        db = Room.databaseBuilder(getApplicationContext(), NoteDB.class, "notedatabase")
-                .allowMainThreadQueries()
-                .build();
 
         notesRecycler = (RecyclerView) findViewById(R.id.notes_recycler);
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, 1);
         notesRecycler.setLayoutManager(layoutManager);
+
+        searchEditText = (EditText) findViewById(R.id.searchEditText);
+    }
+
+    private void initDB(){
+        db = Room.databaseBuilder(getApplicationContext(), NoteDB.class, "notedatabase")
+                .allowMainThreadQueries()
+                .build();
     }
 
     @Override
@@ -106,14 +118,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             isCard = false;
                             createAdapter();
                         }
-                        Log.i("RxTest", "isCard " + isCard);
                         break;
                     case R.id.menu_cardlist_view:
                         if(!isCard) {
                             isCard = true;
                             createAdapter();
                         }
-                        Log.i("RxTest", "isCard " + isCard);
                         break;
                 }
                 return true;
@@ -184,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private void createSearch(){
         isSearch = !isSearch;
-        searchEditText = (EditText) findViewById(R.id.searchEditText);
+
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) searchEditText.getLayoutParams();
 
         if(isSearch) {
@@ -202,12 +212,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     maybeSearchNotes(searchText);
                 }
             });
-            Log.i("TEST", "search");
         } else {
             int nullDimen = (int) getResources().getDimension(R.dimen.height_null);
             setEditTextLayoutParams(params, nullDimen, nullDimen);
             searchEditText.setText("");
-            Log.i("TEST", "!search");
             flowableAllNotes();
         }
 

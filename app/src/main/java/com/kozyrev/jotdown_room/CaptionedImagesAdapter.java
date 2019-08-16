@@ -1,6 +1,7 @@
 package com.kozyrev.jotdown_room;
 
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -26,7 +27,6 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         this.isCard = isCard;
     }
 
-
     public void updateNotesList(List<Note> notes, boolean isCard){
         if (this.notes != null) {
             this.notes.clear();
@@ -48,8 +48,9 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         return notes == null ? 0 : notes.size();
     }
 
+    @NonNull
     @Override
-    public CaptionedImagesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType){
+    public CaptionedImagesAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.card_captioned_image, parent, false);
         ViewHolder viewHolder = new ViewHolder(cardView) {};
 
@@ -72,7 +73,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, final int position){
+    public void onBindViewHolder(@NonNull ViewHolder holder, final int position){
         CardView cardView = holder.cardView;
 
         Note note = notes.get(position);
@@ -102,7 +103,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
         textView.setText(text);
     }
 
-    public void setListener(Listener listener){
+    void setListener(Listener listener){
         this.listener = listener;
     }
 
