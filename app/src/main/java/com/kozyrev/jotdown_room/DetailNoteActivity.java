@@ -208,6 +208,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                     if (alarmTime.compareTo(new Date()) < 1) {
                         cancelAlarm(alarmTime.toString());
                     } else {
+                        calendar.setTime(alarmTime);
                         setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
                         alarmTextView.setText(alarmTime.toString());
                     }
@@ -440,6 +441,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* DATABASE ------------------------------------- Взаимодействия с БД ----------------------------------------------- */
     private void addNote(){
         Note note = new Note(title.getText().toString(), description.getText().toString(), imageUriString);
+        isNowCalendar();
         setAlarmText(note);
         db.getNoteDAO().insert(note);
     }
@@ -449,8 +451,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         note.setName(title.getText().toString());
         note.setDescription(description.getText().toString());
         note.setImageResourceUri(imageUriString);
+        isNowCalendar();
         setAlarmText(note);
         db.getNoteDAO().update(note);
+    }
+
+    private  void isNowCalendar(){
+        if (calendar.getTime().compareTo(Calendar.getInstance().getTime()) > 0) {
+            setAlarm(calendar);
+        }
     }
 
     private void setAlarmText(Note note){
@@ -471,7 +480,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             calendar.set(Calendar.MINUTE, minute);
             calendar.set(Calendar.SECOND, 0);
             calendar.set(Calendar.MILLISECOND, 0);
-            setAlarm(calendar);
+
+            setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
+            alarmTextView.setText(calendar.getTime().toString());
+
+            //setAlarm(calendar);
     };
 
     private void openDatePickerDialog(Date updateDate){
@@ -499,15 +512,16 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         if (isAlarmUpdating) cancelAlarm(alarmText);
 
+        newAlarmIntent(alarmText, targetCal);
+    }
+
+    private void newAlarmIntent(String alarmText, Calendar targetCal){
         Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
         intent.putExtra(AlarmReceiver.EXTRA_NOTE_ID, noteId);
         intent.putExtra(AlarmReceiver.EXTRA_TITLE, title.getText().toString());
         intent.putExtra(AlarmReceiver.EXTRA_CONTENT_TEXT, description.getText().toString());
         intent.putExtra(AlarmReceiver.EXTRA_URI, imageUriString);
         intent.setAction(alarmText);
-
-        setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
-        alarmTextView.setText(alarmText);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
