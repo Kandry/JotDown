@@ -1,58 +1,39 @@
 package com.kozyrev.jotdown_room;
 
-import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.kozyrev.jotdown_room.DB.Note;
-import com.squareup.picasso.Picasso;
+import com.kozyrev.jotdown_room.Factory.ViewHolderFactory;
+import com.kozyrev.jotdown_room.RowTypes.RowType;
 
 import java.util.List;
 
-public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImagesAdapter.ViewHolder> {
+public class CaptionedImagesAdapter extends RecyclerView.Adapter {
 
-    private List<Note> notes = null;
     private Listener listener;
-    private boolean isCard;
+    private List<RowType> dataSet;
 
-    public CaptionedImagesAdapter(List<Note> notes, boolean isCard){
-        this.notes = notes;
-        this.isCard = isCard;
-    }
-
-    public void updateNotesList(List<Note> notes, boolean isCard){
-        if (this.notes != null) {
-            this.notes.clear();
-            this.notes.addAll(notes);
-        } else {
-            this.notes = notes;
-        }
-        this.isCard = isCard;
-        this.notifyDataSetChanged();
+    public CaptionedImagesAdapter(List<RowType> dataSet){
+        this.dataSet = dataSet;
     }
 
     @Override
-    public long getItemId(int position) {
-        return super.getItemId(position);
+    public int getItemViewType(int position){
+        return dataSet.get(position).getItemViewType();
     }
 
     @Override
     public int getItemCount(){
-        return notes == null ? 0 : notes.size();
+        return dataSet == null ? 0 : dataSet.size();
     }
 
     @NonNull
     @Override
-    public CaptionedImagesAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-        CardView cardView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.card_captioned_image, parent, false);
-        ViewHolder viewHolder = new ViewHolder(cardView) {};
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+        RecyclerView.ViewHolder viewHolder = ViewHolderFactory.create(parent, viewType);
+        CardView cardView = (CardView) viewHolder.itemView;
 
         cardView.setOnClickListener((v) -> {
             int adapterPosition = viewHolder.getAdapterPosition();
@@ -73,47 +54,17 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<CaptionedImages
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, final int position){
-        CardView cardView = holder.cardView;
-
-        Note note = notes.get(position);
-
-        textViewSetText(cardView, R.id.info_name, note.getName());
-        textViewSetText(cardView, R.id.info_description, note.getDescription());
-
-        ImageView imageView = (ImageView)cardView.findViewById(R.id.info_image);
-        imageView.setImageURI(null);
-
-        if (note.getImageResourceUri() != null && isCard) {
-            imageView.getLayoutParams().height = (int) imageView.getResources().getDimension(R.dimen.imageview_height);
-            Uri imageUri = Uri.parse(note.getImageResourceUri());
-            Picasso.get()
-                    .load(imageUri)
-                    .resize(800, 450)
-                    .centerCrop()
-                    .into(imageView);
-            imageView.setContentDescription(note.getName());
-        } else {
-            imageView.getLayoutParams().height = (int) imageView.getResources().getDimension(R.dimen.height_null);
-        }
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position){
+        dataSet.get(position).onBindViewHolder(holder);
     }
 
-    private void textViewSetText(CardView cardView, int textViewId, String text){
-        TextView textView = (TextView)cardView.findViewById(textViewId);
-        textView.setText(text);
+    public void updateNotesList(List<RowType> dataSet){
+        this.dataSet = dataSet;
+        this.notifyDataSetChanged();
     }
 
     void setListener(Listener listener){
         this.listener = listener;
-    }
-
-    static class ViewHolder extends RecyclerView.ViewHolder{
-        private CardView cardView;
-
-        ViewHolder(CardView v){
-            super(v);
-            cardView = v;
-        }
     }
 
     interface Listener{

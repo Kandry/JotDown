@@ -24,7 +24,11 @@ import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
+import com.kozyrev.jotdown_room.RowTypes.ImageRowType;
+import com.kozyrev.jotdown_room.RowTypes.RowType;
+import com.kozyrev.jotdown_room.RowTypes.TextRowType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -45,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private List<Note> notesList = null;
     boolean isCard = true;
     boolean isSearch = false;
+    List<RowType> items = new ArrayList<>();
 
     NoteDB db;
 
@@ -116,13 +121,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     case R.id.menu_list_view:
                         if(isCard) {
                             isCard = false;
-                            createAdapter();
+                            updateAdapter();
                         }
                         break;
                     case R.id.menu_cardlist_view:
                         if(!isCard) {
                             isCard = true;
-                            createAdapter();
+                            updateAdapter();
                         }
                         break;
                 }
@@ -142,13 +147,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesAllList
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new DisposableSubscriber<List<Note>>() {
-
                     @Override
                     public void onNext(List<Note> listNote) {
                         Log.i("RxTest", "Next");
                         if (!isSearch) {
                             notesList = listNote;
-                            createAdapter();
+                            if(notesRecycler.getAdapter() != null){
+                                updateAdapter();
+                            } else {
+                                createAdapter();
+                            }
                         }
                     }
 
@@ -172,7 +180,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void createAdapter(){
-        CaptionedImagesAdapter adapter = new CaptionedImagesAdapter(notesList, isCard);
+        setAdaptersDataSet();
+
+        CaptionedImagesAdapter adapter = new CaptionedImagesAdapter(items);
         notesRecycler.setAdapter(adapter);
 
         adapter.setListener(new CaptionedImagesAdapter.Listener() {
@@ -190,6 +200,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void updateAdapter(){
+        setAdaptersDataSet();
+
+        CaptionedImagesAdapter adapter = (CaptionedImagesAdapter) notesRecycler.getAdapter();
+        adapter.updateNotesList(items);
+    }
+
+    private void setAdaptersDataSet(){
+        if (items.size() > 0) items.clear();
+
+        for (Note note : notesList){
+            if ((note.getImageResourceUri() != null) && isCard){
+                items.add(new ImageRowType(note));
+            } else {
+                items.add(new TextRowType(note));
+            }
+        }
     }
 
     private void createSearch(){
@@ -237,7 +266,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onSuccess(@NonNull List<Note> listNote) {
                 notesList = listNote;
-                createAdapter();
+                updateAdapter();
             }
 
             @Override
