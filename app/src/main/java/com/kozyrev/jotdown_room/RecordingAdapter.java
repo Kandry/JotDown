@@ -22,12 +22,18 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
 
     private Context context;
     private MediaPlayer mediaPlayer;
+    private RecordsListener recordsListener;
 
     private ArrayList<Recording> recordingArrayList;
 
     private boolean isPlaying = false;
     private boolean isHaveToStop = false;
     private int last_index = -1;
+
+    void notifyUpdateRecordsList(ArrayList<Recording> recordingArrayList){
+        this.recordingArrayList = recordingArrayList;
+        this.notifyDataSetChanged();
+    }
 
     void notifyStopPlaying(){
         isHaveToStop = true;
@@ -43,7 +49,17 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.recording_item_layout, parent, false);
-        return new ViewHolder(view);
+        ViewHolder viewHolder = new ViewHolder(view);
+
+        view.setOnLongClickListener(v -> {
+            int adapterPosition = viewHolder.getAdapterPosition();
+            if (adapterPosition != RecyclerView.NO_POSITION && recordsListener != null) {
+                recordsListener.onLongClick(adapterPosition);
+            }
+            return true;
+        });
+
+        return viewHolder;
     }
 
     @Override
@@ -194,5 +210,13 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
                 notifyItemChanged(position);
             });
         }
+    }
+
+    void setRecordsListener(RecordsListener recordsListener){
+        this.recordsListener = recordsListener;
+    }
+
+    interface RecordsListener{
+        void onLongClick(int position);
     }
 }

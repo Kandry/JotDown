@@ -102,6 +102,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private String imageUriString;
     private boolean notImageAdding = true;
     private boolean isAlarmUpdating = false;
+    private boolean isRecord = false;
     private Uri cameraImageUri;
     Uri originalUri;
     private Date alarmTime = null;
@@ -132,9 +133,12 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         downloadData();
         initViewsListeners();
+
+        if (noteId < 0) noteId = (int) addNote();
+
         // RxAndroid
         // Загружаем записи. Нужно переделать под RxAndroid, шоб ассинхронно и налету
-        //fetchRecordings();
+        fetchRecordings();
     }
 
     @Override
@@ -142,8 +146,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         super.onPause();
 
         if (notImageAdding){
-            if (noteId < 0) addNote();
-            else updateNote();
+            updateNote();
         }
     }
     /* ------------------------------- Конец взаимодействий с жизненным циклом активности ------------------------------- */
@@ -174,6 +177,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         cameraButton = (ImageButton) findViewById(R.id.cameraButton);
         imageButton = (ImageButton) findViewById(R.id.imageButton);
         audioRecordingButton = (ImageButton) findViewById(R.id.audioRecordingButton);
+
+        recordingArraylist = new ArrayList<Recording>();
     }
 
     private void initDB(){
@@ -233,31 +238,25 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             return true;
         });
 
-        audioRecordingButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                    if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
-                        audioRecordingButtonDownUp(event);
-                    }
-                } else {
-                    audioRecordingButtonDownUp(event);
+        audioRecordingButton.setOnClickListener(view -> {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
+                    recordButtonClick();
                 }
-                return true;
+            } else {
+                recordButtonClick();
             }
         });
     }
 
-    private void audioRecordingButtonDownUp(MotionEvent event){
-        switch(event.getAction()){
-            case MotionEvent.ACTION_DOWN:
-                prepareForRecording();
-                startRecording();
-                break;
-            case MotionEvent.ACTION_UP:
-                prepareForStop();
-                stopRecording();
-                break;
+    private void recordButtonClick(){
+        isRecord = !isRecord;
+        if (isRecord) {
+            prepareForRecording();
+            startRecording();
+        } else {
+            prepareForStop();
+            stopRecording();
         }
     }
 
@@ -439,11 +438,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* ----------------------------------------- Конец взаимодействий с камерой ----------------------------------------- */
 
     /* DATABASE ------------------------------------- Взаимодействия с БД ----------------------------------------------- */
-    private void addNote(){
+    private long addNote(){
         Note note = new Note(title.getText().toString(), description.getText().toString(), imageUriString);
-        isNowCalendar();
-        setAlarmText(note);
-        db.getNoteDAO().insert(note);
+        //isNowCalendar();
+        //setAlarmText(note);
+        return db.getNoteDAO().insert(note);
     }
 
     private void updateNote(){
@@ -483,8 +482,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
             setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
             alarmTextView.setText(calendar.getTime().toString());
-
-            //setAlarm(calendar);
     };
 
     private void openDatePickerDialog(Date updateDate){
@@ -553,19 +550,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* --------------------------------------- Конец взаимодействий с будильником --------------------------------------- */
 
     /* AUDIO ----------------------------------- Взаимодействия с аудиозаписями ----------------------------------------- */
-   /* private void addAudioRecord() {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
-                prepareForRecording();
-            }
-        } else {
-            prepareForRecording();
-        }
-    }*/
-
     private void prepareForRecording(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
-        startRecording();
+        int audioButtonColor = getResources().getColor(R.color.colorAccent);
+        audioRecordingButton.setBackgroundColor(audioButtonColor);
+        // Ограничить доступность остальных действий
     }
 
     private void startRecording(){
@@ -573,17 +562,17 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
 
-        File root = android.os.Environment.getExternalStorageDirectory();
-        File file = new File(root.getAbsolutePath() + "/VoiceAudioRecords/Note" + noteId);
+        File root = getRoot();
+        File file = new File(root.getAbsolutePath() + "/VoiceRecords/Note" + noteId);
         if (!file.exists()){
             file.mkdirs();
         }
 
-        audioRecordFileName = root.getAbsolutePath() + "/VoiceAudioRecords/Note" + noteId + "/" + String.valueOf(System.currentTimeMillis() + ".mp3");
+        audioRecordFileName = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + String.valueOf(System.currentTimeMillis() + ".mp3");
         mediaRecorder.setOutputFile(audioRecordFileName);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
-        recordingAdapter.notifyStopPlaying();
+        if (recordingAdapter != null) recordingAdapter.notifyStopPlaying();
 
         try{
             mediaRecorder.prepare();
@@ -595,52 +584,82 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private void prepareForStop(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
+        // Снять ограничение доступности остальных действий
     }
 
     private void stopRecording(){
         try {
             mediaRecorder.stop();
             mediaRecorder.release();
+
+            File root = getRoot();
+            File[] files = getNoteRecordsDirectoryFiles(root);
+            addRecordToRecordingArrayList(files.length - 1, root, files);
+
+            recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+            Toast.makeText(getApplicationContext(), "Record added", Toast.LENGTH_SHORT).show();
+
         } catch(Exception ex){
             ex.printStackTrace();
         }
 
         mediaRecorder = null;
-
-        Toast.makeText(this, "Recording saved successfully.", Toast.LENGTH_SHORT).show();
     }
 
     private void fetchRecordings() {
-        File root = android.os.Environment.getExternalStorageDirectory();
-        String path = root.getAbsolutePath() + "/VoiceAudioRecords/Note" + noteId;
-        Log.d("Files", "Path: " + path);
-        File directory = new File(path);
-        File[] files = directory.listFiles();
-        //Log.d("Files", "Size: " + files.length);
-        if (files != null) {
+        File root = getRoot();
+        File[] files = getNoteRecordsDirectoryFiles(root);
+        if (files != null){
 
             for (int i = 0; i < files.length; i++) {
-                Log.d("Files", "FileName:" + files[i].getName());
-                String fileName = files[i].getName();
-                String recordingUri = root.getAbsolutePath() + "/VoiceAudioRecords/Note" + noteId + "/" + fileName;
-
-                Recording recording = new Recording(recordingUri, fileName, false);
-                recordingArraylist.add(recording);
+                addRecordToRecordingArrayList(i, root, files);
             }
 
             textViewNoRecordings.setVisibility(View.GONE);
             recyclerViewRecordings.setVisibility(View.VISIBLE);
-            setAdapterToRecyclerView();
 
         } else {
             textViewNoRecordings.setVisibility(View.VISIBLE);
             recyclerViewRecordings.setVisibility(View.GONE);
         }
+
+        setAdapterToRecyclerView();
     }
 
     private void setAdapterToRecyclerView(){
         recordingAdapter = new RecordingAdapter(this,recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
+        recordingAdapter.setRecordsListener(new RecordingAdapter.RecordsListener() {
+            @Override
+            public void onLongClick(int position) {
+                File root = getRoot();
+                File[] files = getNoteRecordsDirectoryFiles(root);
+
+                File recordFile = new File(files[position].getAbsolutePath());
+                recordFile.delete();
+
+                recordingArraylist.remove(position);
+                recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+                Toast.makeText(getApplicationContext(), "Record deleted", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private File getRoot(){
+        return android.os.Environment.getExternalStorageDirectory();
+    }
+
+    private File[] getNoteRecordsDirectoryFiles(File root){
+        String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
+        File directory = new File(path);
+        return directory.listFiles();
+    }
+
+    private void addRecordToRecordingArrayList(int i, File root, File[] files){
+        String fileName = files[i].getName();
+        String recordingUri = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + fileName;
+        Recording recording = new Recording(recordingUri, fileName, false);
+        recordingArraylist.add(recording);
     }
     /* -------------------------------------- Конец взаимодействий с аудиозаписями -------------------------------------- */
 }

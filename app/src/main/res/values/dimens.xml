@@ -2,6 +2,6 @@
 <resources>
     <dimen name="height_null">0dp</dimen>
     <dimen name="imageview_height">200dp</dimen>
-    <dimen name="searchEditText_height">30dp</dimen>
+    <dimen name="searchEditText_height">35dp</dimen>
     <dimen name="margin_top">2dp</dimen>
 </resources>

@@ -17,7 +17,7 @@ import io.reactivex.Single;
 public interface NoteDAO {
 
     @Insert
-    void insert(Note note);
+    long insert(Note note);
 
     @Insert
     void insertAll(Note... notes);
@@ -42,4 +42,7 @@ public interface NoteDAO {
 
     @Query("SELECT * FROM NOTES WHERE name LIKE '%' || :text || '%' OR description LIKE '%' || :text || '%'")
     Maybe<List<Note>> getAllNotesBySearchText(String text);
+
+    @Query("SELECT COUNT(*) FROM NOTES")
+    int getNotesCount();
 }

@@ -16,7 +16,8 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".DetailNoteActivity">
+            android:name=".DetailNoteActivity"
+            android:windowSoftInputMode="stateHidden">
         </activity>
 
         <activity

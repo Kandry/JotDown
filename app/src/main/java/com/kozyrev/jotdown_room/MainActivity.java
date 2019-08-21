@@ -28,6 +28,7 @@ import com.kozyrev.jotdown_room.RowTypes.ImageRowType;
 import com.kozyrev.jotdown_room.RowTypes.RowType;
 import com.kozyrev.jotdown_room.RowTypes.TextRowType;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -180,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void createAdapter(){
-        setAdaptersDataSet();
+        setAdapterDataSet();
 
         CaptionedImagesAdapter adapter = new CaptionedImagesAdapter(items);
         notesRecycler.setAdapter(adapter);
@@ -195,7 +196,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onLongClick(int position) {
-                Note note = db.getNoteDAO().getNoteById(notesList.get(position).getUid());
+                int noteId = notesList.get(position).getUid();
+                Note note = db.getNoteDAO().getNoteById(noteId);
+
+                // РАЗРЕШЕНИЯ СПРОСИТЬ
+                File root = android.os.Environment.getExternalStorageDirectory();
+                String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
+                File directory = new File(path);
+                File[] files = directory.listFiles();
+                for (File file : files){
+                    file.delete();
+                }
+                directory.delete();
+
                 db.getNoteDAO().delete(note);
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
             }
@@ -203,13 +216,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void updateAdapter(){
-        setAdaptersDataSet();
+        setAdapterDataSet();
 
         CaptionedImagesAdapter adapter = (CaptionedImagesAdapter) notesRecycler.getAdapter();
         adapter.updateNotesList(items);
     }
 
-    private void setAdaptersDataSet(){
+    private void setAdapterDataSet(){
         if (items.size() > 0) items.clear();
 
         for (Note note : notesList){
@@ -276,5 +289,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onComplete() {}
         };
         notesMaybe.subscribe(observer);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(isSearch) createSearch();
     }
 }
