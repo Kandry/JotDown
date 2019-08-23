@@ -1,19 +1,23 @@
-package com.kozyrev.jotdown_room;
+package com.kozyrev.jotdown_room.Adapter;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.ViewGroup;
+
+import androidx.recyclerview.selection.SelectionTracker;
 
 import com.kozyrev.jotdown_room.Factory.ViewHolderFactory;
 import com.kozyrev.jotdown_room.RowTypes.RowType;
 
 import java.util.List;
 
-public class CaptionedImagesAdapter extends RecyclerView.Adapter {
+public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> {
 
     private Listener listener;
     private List<RowType> dataSet;
+    private SelectionTracker selectionTracker;
 
     public CaptionedImagesAdapter(List<RowType> dataSet){
         this.dataSet = dataSet;
@@ -31,8 +35,8 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter {
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-        RecyclerView.ViewHolder viewHolder = ViewHolderFactory.create(parent, viewType);
+    public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+        AppViewHolder viewHolder = ViewHolderFactory.create(parent, viewType, dataSet);
         CardView cardView = (CardView) viewHolder.itemView;
 
         cardView.setOnClickListener((v) -> {
@@ -42,20 +46,24 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter {
             }
         });
 
-        cardView.setOnLongClickListener(v -> {
+
+
+        /*cardView.setOnLongClickListener(v -> {
             int adapterPosition = viewHolder.getAdapterPosition();
             if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
                 listener.onLongClick(adapterPosition);
             }
             return true;
-        });
+        });*/
 
         return viewHolder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, final int position){
-        dataSet.get(position).onBindViewHolder(holder);
+    public void onBindViewHolder(@NonNull AppViewHolder holder, int position){
+        RowType item = dataSet.get(position);
+        holder.bind(selectionTracker.isSelected(item));
+        item.onBindViewHolder(holder);
     }
 
     public void updateNotesList(List<RowType> dataSet){
@@ -63,12 +71,16 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter {
         this.notifyDataSetChanged();
     }
 
-    void setListener(Listener listener){
+    public void setListener(Listener listener){
         this.listener = listener;
     }
 
-    interface Listener{
+    public void setSelectionTracker(SelectionTracker selectionTracker){
+        this.selectionTracker = selectionTracker;
+    }
+
+    public interface Listener{
         void onClick(int position);
-        void onLongClick(int position);
+       // void onLongClick(int position);
     }
 }

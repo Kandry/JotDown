@@ -2,12 +2,17 @@ package com.kozyrev.jotdown_room;
 
 import android.arch.persistence.room.Room;
 import android.content.Intent;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.view.ActionMode;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -17,11 +22,21 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.recyclerview.selection.ItemDetailsLookup;
+import androidx.recyclerview.selection.OnDragInitiatedListener;
+import androidx.recyclerview.selection.OnItemActivatedListener;
+import androidx.recyclerview.selection.SelectionTracker;
+import androidx.recyclerview.selection.StorageStrategy;
+
+import com.kozyrev.jotdown_room.Adapter.CaptionedImagesAdapter;
+import com.kozyrev.jotdown_room.Adapter.NoteItemKeyProvider;
+import com.kozyrev.jotdown_room.Adapter.NoteItemLookup;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.RowTypes.ImageRowType;
@@ -30,6 +45,7 @@ import com.kozyrev.jotdown_room.RowTypes.TextRowType;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -46,6 +62,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
+    SelectionTracker selectionTracker;
+    ActionMode actionMode;
 
     private List<Note> notesList = null;
     boolean isCard = true;
@@ -61,6 +79,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initViews();
         initDB();
+
+        if (savedInstanceState != null) {
+            selectionTracker.onRestoreInstanceState(savedInstanceState);
+        }
     }
 
     private void initViews(){
@@ -78,6 +100,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler = (RecyclerView) findViewById(R.id.notes_recycler);
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, 1);
         notesRecycler.setLayoutManager(layoutManager);
+        notesRecycler.setItemAnimator(new DefaultItemAnimator());
+        notesRecycler.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
 
         searchEditText = (EditText) findViewById(R.id.searchEditText);
     }
@@ -143,6 +167,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         flowableAllNotes();
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        selectionTracker.onSaveInstanceState(outState);
+    }
+
     private void flowableAllNotes(){
         Flowable<List<Note>> notesAllList = db.getNoteDAO().getAllNotesFlowable();
         notesAllList
@@ -170,8 +200,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void onClickAdd(View view) {
-        /*String imageUri = "android.resource://com.kozyrev.jotdown_room/" + R.drawable.note_example;
-        db.getNoteDAO().insert(new Note("Example note", "This an example note", imageUri));*/
         addNewNote();
     }
 
@@ -186,14 +214,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         CaptionedImagesAdapter adapter = new CaptionedImagesAdapter(items);
         notesRecycler.setAdapter(adapter);
 
+        /*
         adapter.setListener(new CaptionedImagesAdapter.Listener() {
             @Override
             public void onClick(int position) {
                 Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
                 intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(position).getUid());
                 startActivity(intent);
-            }
-
+            }*/
+/*
             @Override
             public void onLongClick(int position) {
                 int noteId = notesList.get(position).getUid();
@@ -211,8 +240,77 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 db.getNoteDAO().delete(note);
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
+            }*/
+        //});
+
+        selectionTracker = new SelectionTracker.Builder<>(
+                "noteSelectionId",
+                notesRecycler,
+                new NoteItemKeyProvider(1, items),
+                new NoteItemLookup(notesRecycler),
+                StorageStrategy.createLongStorage()
+        )
+                .withOnItemActivatedListener(new OnItemActivatedListener<Long>() {
+                    @Override
+                    public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> item, @NonNull MotionEvent motionEvent) {
+                        Log.d("select-", "Selected ItemId: " + item.getPosition());
+                        Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
+                        intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
+                        startActivity(intent);
+                        return true;
+                    }
+                })
+                .withOnDragInitiatedListener(new OnDragInitiatedListener() {
+                    @Override
+                    public boolean onDragInitiated(@NonNull MotionEvent motionEvent) {
+                        Log.d("select-", "onDragInitiated");
+                        return true;
+                    }
+                })
+                .build();
+
+        adapter.setSelectionTracker(selectionTracker);
+        selectionTracker.addObserver(new SelectionTracker.SelectionObserver() {
+            @Override
+            public void onItemStateChanged(@NonNull Object key, boolean selected) {
+                super.onItemStateChanged(key, selected);
+            }
+
+            @Override
+            public void onSelectionRefresh() {
+                super.onSelectionRefresh();
+            }
+
+            @Override
+            public void onSelectionChanged() {
+                super.onSelectionChanged();
+                if(selectionTracker.hasSelection() && actionMode == null){
+                    actionMode = startSupportActionMode(new ActionModeController(MainActivity.this, selectionTracker));
+                    setMenuItemTitle(selectionTracker.getSelection().size());
+                } else if (!selectionTracker.hasSelection() && actionMode != null){
+                    actionMode.finish();
+                    actionMode = null;
+                } else {
+                    setMenuItemTitle(selectionTracker.getSelection().size());
+                    selectionTracker.clearSelection();
+                }
+                Iterator<RowType> itemIterable = selectionTracker.getSelection().iterator();
+                while (itemIterable.hasNext()){
+                    Log.d("select-", itemIterable.next().getClass().getName());
+                    Log.d("select-", "Click4");
+                }
+            }
+
+            @Override
+            public void onSelectionRestored() {
+                super.onSelectionRestored();
             }
         });
+    }
+
+    public void setMenuItemTitle(int selectedItemSize) {
+        Log.d("select-", "Count: " + selectedItemSize);
+        //selectedItemCount.setTitle("" + selectedItemSize);
     }
 
     private void updateAdapter(){

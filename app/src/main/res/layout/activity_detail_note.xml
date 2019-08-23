@@ -71,13 +71,13 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"/>
 
-                    <TextView
-                        android:id="@+id/textViewNoRecordings"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="No Recordings found."
-                        android:visibility="gone"
-                        android:textColor="@android:color/darker_gray"/>
+<!--                    <TextView-->
+<!--                        android:id="@+id/textViewNoRecordings"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="No Recordings found."-->
+<!--                        android:visibility="gone"-->
+<!--                        android:textColor="@android:color/darker_gray"/>-->
 
                     <TextView
                         android:id="@+id/textViewAlarmPrompt"

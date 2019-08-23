@@ -7,12 +7,21 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.recyclerview.selection.ItemDetailsLookup;
+
+import com.kozyrev.jotdown_room.Adapter.AppViewHolder;
+import com.kozyrev.jotdown_room.Adapter.NoteItemDetail;
+import com.kozyrev.jotdown_room.Adapter.ViewHolderWithDetails;
 import com.kozyrev.jotdown_room.R;
 import com.kozyrev.jotdown_room.RowTypes.RowType;
 
+import java.util.List;
+
 public class ViewHolderFactory {
 
-    public static class ImageViewHolder extends RecyclerView.ViewHolder {
+    private static List<RowType> factoryDataSet;
+
+    public static class ImageViewHolder extends AppViewHolder implements ViewHolderWithDetails {
 
         public ImageView imageView;
         public TextView textView_title;
@@ -24,9 +33,14 @@ public class ViewHolderFactory {
             textView_title = (TextView) itemView.findViewById(R.id.info_name_imageCard);
             textView_description = (TextView) itemView.findViewById(R.id.info_description_imageCard);
         }
+
+        @Override
+        public ItemDetailsLookup.ItemDetails getItemDetails(){
+            return new NoteItemDetail(getAdapterPosition(), factoryDataSet.get(getAdapterPosition()));
+        }
     }
 
-    public static class TextViewHolder extends RecyclerView.ViewHolder {
+    public static class TextViewHolder extends AppViewHolder implements ViewHolderWithDetails {
 
         public TextView textView_title;
         public TextView textView_description;
@@ -36,9 +50,17 @@ public class ViewHolderFactory {
             textView_title = (TextView) itemView.findViewById(R.id.info_name_textCard);
             textView_description = (TextView) itemView.findViewById(R.id.info_description_textCard);
         }
+
+        @Override
+        public ItemDetailsLookup.ItemDetails getItemDetails(){
+            return new NoteItemDetail(getAdapterPosition(), factoryDataSet.get(getAdapterPosition()));
+        }
     }
 
-    public static RecyclerView.ViewHolder create(ViewGroup parent, int viewType){
+    public static AppViewHolder create(ViewGroup parent, int viewType, List<RowType> dataSet){
+
+        factoryDataSet = dataSet;
+
         switch (viewType){
             case RowType.IMAGE_ROW_TYPE:
                 CardView imageTypeView = (CardView) LayoutInflater.from(parent.getContext()).inflate(R.layout.card_captioned_image, parent, false);

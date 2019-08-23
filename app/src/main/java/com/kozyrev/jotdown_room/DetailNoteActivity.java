@@ -18,7 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
-import android.support.transition.Transition;
 import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
@@ -30,12 +29,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.DatePicker;
 import android.widget.ImageButton;
@@ -45,6 +41,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.kozyrev.jotdown_room.Adapter.RecordingAdapter;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
@@ -86,7 +83,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private TextInputEditText description;
     private TextView alarmTextView;
     private RecyclerView recyclerViewRecordings;
-    private TextView textViewNoRecordings;
     private LinearLayout buttonsLayout;
     private ImageButton cameraButton;
     private ImageButton imageButton;
@@ -171,7 +167,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         recyclerViewRecordings = (RecyclerView) findViewById(R.id.recyclerViewRecordings);
         recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         recyclerViewRecordings.setHasFixedSize(true);
-        textViewNoRecordings = (TextView) findViewById(R.id.textViewNoRecordings);
 
         buttonsLayout = (LinearLayout) findViewById(R.id.buttonsLayout);
         cameraButton = (ImageButton) findViewById(R.id.cameraButton);
@@ -614,13 +609,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             for (int i = 0; i < files.length; i++) {
                 addRecordToRecordingArrayList(i, root, files);
             }
-
-            textViewNoRecordings.setVisibility(View.GONE);
-            recyclerViewRecordings.setVisibility(View.VISIBLE);
-
-        } else {
-            textViewNoRecordings.setVisibility(View.VISIBLE);
-            recyclerViewRecordings.setVisibility(View.GONE);
         }
 
         setAdapterToRecyclerView();

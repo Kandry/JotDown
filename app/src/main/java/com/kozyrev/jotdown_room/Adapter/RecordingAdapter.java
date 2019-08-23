@@ -1,4 +1,4 @@
-package com.kozyrev.jotdown_room;
+package com.kozyrev.jotdown_room.Adapter;
 
 import android.content.Context;
 import android.media.MediaPlayer;
@@ -14,6 +14,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.kozyrev.jotdown_room.Entities.Recording;
+import com.kozyrev.jotdown_room.R;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,12 +31,12 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
     private boolean isHaveToStop = false;
     private int last_index = -1;
 
-    void notifyUpdateRecordsList(ArrayList<Recording> recordingArrayList){
+    public void notifyUpdateRecordsList(ArrayList<Recording> recordingArrayList){
         this.recordingArrayList = recordingArrayList;
         this.notifyDataSetChanged();
     }
 
-    void notifyStopPlaying(){
+    public void notifyStopPlaying(){
         isHaveToStop = true;
         this.notifyDataSetChanged();
     }
@@ -212,11 +213,11 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
         }
     }
 
-    void setRecordsListener(RecordsListener recordsListener){
+    public void setRecordsListener(RecordsListener recordsListener){
         this.recordsListener = recordsListener;
     }
 
-    interface RecordsListener{
+    public interface RecordsListener{
         void onLongClick(int position);
     }
 }
