@@ -1,5 +1,6 @@
 package com.kozyrev.jotdown_room.RowTypes;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.widget.ImageView;
@@ -7,6 +8,7 @@ import android.widget.ImageView;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.Factory.ViewHolderFactory;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 public class ImageRowType implements RowType {
 

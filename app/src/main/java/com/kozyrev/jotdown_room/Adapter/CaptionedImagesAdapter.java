@@ -11,6 +11,7 @@ import androidx.recyclerview.selection.SelectionTracker;
 import com.kozyrev.jotdown_room.Factory.ViewHolderFactory;
 import com.kozyrev.jotdown_room.RowTypes.RowType;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> {
@@ -18,6 +19,8 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
     private Listener listener;
     private List<RowType> dataSet;
     private SelectionTracker selectionTracker;
+
+    public List<Integer> positions = new ArrayList<>();
 
     public CaptionedImagesAdapter(List<RowType> dataSet){
         this.dataSet = dataSet;
@@ -46,8 +49,6 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
             }
         });
 
-
-
         /*cardView.setOnLongClickListener(v -> {
             int adapterPosition = viewHolder.getAdapterPosition();
             if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
@@ -62,11 +63,14 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
     @Override
     public void onBindViewHolder(@NonNull AppViewHolder holder, int position){
         RowType item = dataSet.get(position);
-        holder.bind(selectionTracker.isSelected(item));
+        boolean isSelected = selectionTracker.isSelected(item);
+        holder.bind(isSelected);
+        if (isSelected) {positions.add(position);}
         item.onBindViewHolder(holder);
     }
 
     public void updateNotesList(List<RowType> dataSet){
+        positions.clear();
         this.dataSet = dataSet;
         this.notifyDataSetChanged();
     }

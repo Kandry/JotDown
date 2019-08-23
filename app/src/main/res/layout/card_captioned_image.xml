@@ -13,16 +13,17 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:background="@drawable/note_item_background">
+        android:background="@drawable/note_item_background"
+        android:paddingLeft="2dp"
+        android:paddingTop="2dp"
+        android:paddingRight="2dp">
 
         <ImageView
             android:id="@+id/info_image_imageCard"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:paddingTop="2dp"
-            android:paddingLeft="2dp"
-            android:paddingRight="2dp"/>
+            android:background="@drawable/imageview_in_card_background"
+            android:scaleType="centerCrop"/>
 
         <TextView
             android:id="@+id/info_name_imageCard"

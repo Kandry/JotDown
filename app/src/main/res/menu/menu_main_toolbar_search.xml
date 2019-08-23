@@ -7,32 +7,17 @@
         android:id="@+id/action_item_count"
         android:orderInCategory="1"
         android:title="0"
-        android:visible="false"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_clear"
         android:orderInCategory="2"
         android:title="clear"
-        android:visible="false"
         app:showAsAction="always" />
 
     <item
         android:id="@+id/action_delete"
         android:orderInCategory="3"
         android:title="delete"
-        android:visible="false"
         app:showAsAction="ifRoom" />
-
-    <item android:id="@+id/action_search"
-        android:title="@string/action_search"
-        android:icon="@android:drawable/ic_menu_search"
-        android:orderInCategory="2"
-        app:showAsAction="ifRoom" />
-
-    <item android:id="@+id/action_choose_list_view"
-        android:title="@string/action_choose_list_view"
-        android:icon="@android:drawable/ic_dialog_dialer"
-        android:orderInCategory="3"
-        app:showAsAction="ifRoom"/>
 
 </menu>

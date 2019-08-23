@@ -64,6 +64,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     NavigationView navigationView;
     SelectionTracker selectionTracker;
     ActionMode actionMode;
+    Menu menu;
+
+    MenuItem itemSearch;
+    MenuItem itemChooseListView;
+    MenuItem itemSelectCount;
+    MenuItem itemClear;
+    MenuItem itemDelete;
 
     private List<Note> notesList = null;
     boolean isCard = true;
@@ -115,6 +122,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_main_toolbar, menu);
+        this.menu = menu;
+        itemSearch = menu.findItem(R.id.action_search);
+        itemChooseListView = menu.findItem(R.id.action_choose_list_view);
+        itemSelectCount = menu.findItem(R.id.action_item_count);
+        itemClear = menu.findItem(R.id.action_clear);
+        itemDelete = menu.findItem(R.id.action_delete);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -126,6 +140,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return true;
             case R.id.action_choose_list_view:
                 showPopupMenu(findViewById(R.id.action_choose_list_view));
+                return true;
+            case R.id.action_clear:
+                selectionTracker.clearSelection();
+                return true;
+            case R.id.action_delete:
+                deleteNotes();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -221,8 +241,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
                 intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(position).getUid());
                 startActivity(intent);
-            }*/
-/*
+            }
+
             @Override
             public void onLongClick(int position) {
                 int noteId = notesList.get(position).getUid();
@@ -240,8 +260,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 db.getNoteDAO().delete(note);
                 Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
-            }*/
-        //});
+            }
+        });*/
 
         selectionTracker = new SelectionTracker.Builder<>(
                 "noteSelectionId",
@@ -253,7 +273,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .withOnItemActivatedListener(new OnItemActivatedListener<Long>() {
                     @Override
                     public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> item, @NonNull MotionEvent motionEvent) {
-                        Log.d("select-", "Selected ItemId: " + item.getPosition());
                         Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
                         intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
                         startActivity(intent);
@@ -285,18 +304,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSelectionChanged() {
                 super.onSelectionChanged();
                 if(selectionTracker.hasSelection() && actionMode == null){
+                    Log.d("select-", "Click1");
                     actionMode = startSupportActionMode(new ActionModeController(MainActivity.this, selectionTracker));
+                    setMenuVisisble(true);
                     setMenuItemTitle(selectionTracker.getSelection().size());
                 } else if (!selectionTracker.hasSelection() && actionMode != null){
+                    Log.d("select-", "Click2");
                     actionMode.finish();
                     actionMode = null;
                 } else {
+                    Log.d("select-", "Click3");
+                    setMenuVisisble(false);
                     setMenuItemTitle(selectionTracker.getSelection().size());
                     selectionTracker.clearSelection();
                 }
+
                 Iterator<RowType> itemIterable = selectionTracker.getSelection().iterator();
+
+
                 while (itemIterable.hasNext()){
-                    Log.d("select-", itemIterable.next().getClass().getName());
+                    Log.d("select+++", itemIterable.next().toString());
                     Log.d("select-", "Click4");
                 }
             }
@@ -308,9 +335,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
+    private void deleteNotes(){
+        int sizeSelection = selectionTracker.getSelection().size();
+        selectionTracker.clearSelection();
+
+        List<Integer> positions = ((CaptionedImagesAdapter) notesRecycler.getAdapter()).positions;
+        for (int position : positions){
+            deleteNote(position);
+        }
+
+        Toast.makeText(MainActivity.this, sizeSelection +" notes deleted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void deleteNote(int position){
+        int noteId = notesList.get(position).getUid();
+        Note note = db.getNoteDAO().getNoteById(noteId);
+
+        // РАЗРЕШЕНИЯ СПРОСИТЬ
+        File root = android.os.Environment.getExternalStorageDirectory();
+        String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
+        File directory = new File(path);
+        File[] files = directory.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                file.delete();
+            }
+        }
+        directory.delete();
+
+        db.getNoteDAO().delete(note);
+    }
+
+
     public void setMenuItemTitle(int selectedItemSize) {
-        Log.d("select-", "Count: " + selectedItemSize);
-        //selectedItemCount.setTitle("" + selectedItemSize);
+        itemSelectCount.setTitle("" + selectedItemSize);
+    }
+
+    private void setMenuVisisble(boolean isSelect){
+        itemSearch.setVisible(!isSelect);
+        itemChooseListView.setVisible(!isSelect);
+        itemSelectCount.setVisible(isSelect);
+        itemClear.setVisible(isSelect);
+        itemDelete.setVisible(isSelect);
     }
 
     private void updateAdapter(){

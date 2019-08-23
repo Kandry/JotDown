@@ -19,6 +19,7 @@ public class ActionModeController implements ActionMode.Callback {
 
     @Override
     public boolean onCreateActionMode(ActionMode actionMode, Menu menu) {
+        //actionMode.getMenuInflater().inflate(R.menu.menu_main_toolbar_search, menu);
         return false;
     }
 

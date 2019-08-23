@@ -1,5 +1,6 @@
 package com.kozyrev.jotdown_room.Factory;
 
+import android.os.Build;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -30,6 +31,9 @@ public class ViewHolderFactory {
         ImageViewHolder(CardView itemView){
             super(itemView);
             imageView = (ImageView) itemView.findViewById(R.id.info_image_imageCard);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                imageView.setClipToOutline(true);
+            }
             textView_title = (TextView) itemView.findViewById(R.id.info_name_imageCard);
             textView_description = (TextView) itemView.findViewById(R.id.info_description_imageCard);
         }
