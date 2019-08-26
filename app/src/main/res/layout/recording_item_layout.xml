@@ -1,53 +1,80 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@android:color/white"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:paddingStart="10dp">
+    android:orientation="vertical">
 
-    <ImageView
-        android:id="@+id/imageViewPlay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@android:drawable/ic_media_play"
-        android:layout_gravity="center_vertical"
-        android:clickable="true"
-        android:tint="@android:color/darker_gray"
-        android:focusable="true"
-        android:background="?android:attr/selectableItemBackground"/>
-
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/view_background"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_toEndOf="@+id/imageViewPlay"
-        android:layout_marginStart="30dp">
+        android:layout_height="match_parent"
+        android:background="@color/colorAccent">
 
         <TextView
-            android:id="@+id/textViewRecordingName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="18sp"
-            android:text="Voice 001"
-            android:textColor="@android:color/holo_red_light"
-            android:textStyle="bold"/>
-        <SeekBar
-            android:id="@+id/seekBar"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="end"
+            android:layout_marginEnd="8dp"
+            android:text="Delete"
+            android:textColor="#fff"
+            android:textSize="13sp" />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/view_foreground"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="10dp">
+
+        <ImageView
+            android:id="@+id/imageViewPlay"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_play"
+            android:layout_gravity="center_vertical"
+            android:clickable="true"
+            android:tint="@android:color/darker_gray"
+            android:focusable="true"
+            android:background="?android:attr/selectableItemBackground"/>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:visibility="gone"/>
+            android:orientation="vertical"
+            android:layout_toEndOf="@+id/imageViewPlay"
+            android:layout_marginStart="30dp">
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0.5dp"
-            android:background="@android:color/darker_gray"
-            android:layout_marginTop="15dp"
-            android:layout_marginEnd="20dp"/>
+            <TextView
+                android:id="@+id/textViewRecordingName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="18sp"
+                android:text="Voice 001"
+                android:textColor="@android:color/holo_red_light"
+                android:textStyle="bold"/>
+            <SeekBar
+                android:id="@+id/seekBar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:visibility="gone"/>
 
-    </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="20dp"/>
 
-</RelativeLayout>
+        </LinearLayout>
+    </RelativeLayout>
+
+</FrameLayout>

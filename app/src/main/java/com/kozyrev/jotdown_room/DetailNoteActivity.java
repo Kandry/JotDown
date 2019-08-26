@@ -123,8 +123,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         if (noteId < 0) noteId = (int) addNote();
 
-        noteAudioRecord = new NoteAudioRecord(getApplicationContext(), recyclerViewRecordings, recordingArraylist, noteId);
-        noteAudioRecord.fetchRecordings(drawerLayout);
+        noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
+        noteAudioRecord.fetchRecordings();
     }
 
     @Override

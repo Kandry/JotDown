@@ -5,9 +5,11 @@ import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.Toast;
 
+import com.kozyrev.jotdown_room.Adapter.RecordItemTouchHelper;
 import com.kozyrev.jotdown_room.Adapter.RecordingAdapter;
 import com.kozyrev.jotdown_room.Entities.Recording;
 
@@ -15,10 +17,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class NoteAudioRecord {
+public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchHelperListener {
 
     private Context context;
     private RecyclerView recyclerViewRecordings;
+    private View rootView;
 
     private MediaRecorder mediaRecorder;
     private RecordingAdapter recordingAdapter;
@@ -26,14 +29,18 @@ public class NoteAudioRecord {
 
     private int noteId;
 
-    public NoteAudioRecord(Context context, RecyclerView recyclerViewRecordings, ArrayList<Recording> recordingArraylist, int noteId){
+    public NoteAudioRecord(Context context, View rootView, RecyclerView recyclerViewRecordings, ArrayList<Recording> recordingArraylist, int noteId){
         this.context = context;
+        this.rootView = rootView;
         this.recyclerViewRecordings = recyclerViewRecordings;
         this.recordingArraylist = recordingArraylist;
         this.noteId = noteId;
+
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecordItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewRecordings);
     }
 
-    public void fetchRecordings(View view) {
+    public void fetchRecordings() {
         File root = getRoot();
         File[] files = getNoteRecordsDirectoryFiles(root);
         if (files != null){
@@ -42,42 +49,12 @@ public class NoteAudioRecord {
                 addRecordToRecordingArrayList(i, root, files);
             }
         }
-        setAdapterToRecyclerView(view);
+        setAdapterToRecyclerView();
     }
 
-    private void setAdapterToRecyclerView(View view){
+    private void setAdapterToRecyclerView(){
         recordingAdapter = new RecordingAdapter(context,recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
-        recordingAdapter.setRecordsListener(position -> {
-
-            Recording recording = recordingArraylist.get(position);
-
-            recordingArraylist.remove(position);
-            recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
-
-            Snackbar snackbar = Snackbar
-                    .make(view, "Record deleted", Snackbar.LENGTH_LONG);
-            snackbar.addCallback(new Snackbar.Callback(){
-                @Override
-                public void onDismissed(Snackbar snackbar, int event) {
-                    switch(event) {
-                        case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
-                            File root = getRoot();
-                            File[] files = getNoteRecordsDirectoryFiles(root);
-
-                            File recordFile = new File(files[position].getAbsolutePath());
-                            recordFile.delete();
-                            break;
-                    }
-                }
-            });
-            snackbar.setAction("UNDO", v -> {
-                recordingArraylist.add(position, recording);
-                recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
-            });
-            snackbar.setActionTextColor(Color.YELLOW);
-            snackbar.show();
-        });
     }
 
     public void startRecording(){
@@ -139,5 +116,38 @@ public class NoteAudioRecord {
         String recordingUri = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + fileName;
         Recording recording = new Recording(recordingUri, fileName, false);
         recordingArraylist.add(recording);
+    }
+
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction, int position) {
+        if (viewHolder instanceof RecordingAdapter.ViewHolder){
+            Recording recording = recordingArraylist.get(position);
+
+            recordingArraylist.remove(position);
+            recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+
+            Snackbar snackbar = Snackbar
+                    .make(rootView, "Record deleted", Snackbar.LENGTH_LONG);
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    switch (event) {
+                        case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                            File root = getRoot();
+                            File[] files = getNoteRecordsDirectoryFiles(root);
+
+                            File recordFile = new File(files[position].getAbsolutePath());
+                            recordFile.delete();
+                            break;
+                    }
+                }
+            });
+            snackbar.setAction("UNDO", v -> {
+                recordingArraylist.add(position, recording);
+                recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+        }
     }
 }

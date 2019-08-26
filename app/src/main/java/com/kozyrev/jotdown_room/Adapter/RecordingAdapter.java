@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -94,6 +95,9 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
 
     public class ViewHolder extends RecyclerView.ViewHolder{
 
+        private RelativeLayout backgroundLayout;
+        public RelativeLayout foregroundLayout;
+
         ImageView imageViewPlay;
         SeekBar seekBar;
         TextView textViewName;
@@ -106,6 +110,9 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+
+            backgroundLayout = itemView.findViewById(R.id.view_background);
+            foregroundLayout = itemView.findViewById(R.id.view_foreground);
 
             imageViewPlay = itemView.findViewById(R.id.imageViewPlay);
             seekBar = itemView.findViewById(R.id.seekBar);
