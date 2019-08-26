@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void deleteNote(int position){
-        int noteId =  removedNotes.get(position).getUid(); // notesList.get(position).getUid();
+        int noteId =  removedNotes.get(position).getUid();
         Note note = db.getNoteDAO().getNoteById(noteId);
 
         // РАЗРЕШЕНИЯ СПРОСИТЬ

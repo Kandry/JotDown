@@ -8,15 +8,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.FileProvider;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -40,11 +37,9 @@ import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAudioRecord;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAlarm;
+import com.kozyrev.jotdown_room.NoteDetail.NoteCamera;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,14 +77,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private Calendar calendar = Calendar.getInstance();
     private ShareActionProvider shareActionProvider;
     private Chronometer chronometer;
+
     private NoteAudioRecord noteAudioRecord;
     private NoteAlarm noteAlarm;
+    private NoteCamera noteCamera;
 
     private int noteId;
     private String imageUriString;
     private boolean notImageAdding = true;
     private boolean isRecord = false;
-    private Uri cameraImageUri;
     Uri originalUri;
     private Date alarmTime = null;
     private ArrayList<Recording> recordingArraylist;
@@ -120,6 +116,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         downloadData();
         initViewsListeners();
+
+        noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
 
         if (noteId < 0) noteId = (int) addNote();
 
@@ -289,90 +287,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
             case START_CAMERA_APP:
                 if (resultCode == RESULT_OK){
-                    getPhotoFromCamera();
+                    imageUriString = noteCamera.getPhotoFromCamera((int) getResources().getDimension(R.dimen.imageview_height));
                 }
                 break;
         }
-    }
-
-    private void getImageFromGallery(Intent data){
-        originalUri = data.getData();
-
-        int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-        getContentResolver().takePersistableUriPermission(originalUri, takeFlags);
-
-        imageUriString = originalUri.toString();
-        imageView.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_height);
-        Picasso.get()
-                .load(originalUri)
-                .resize(533, 300)
-                .centerCrop()
-                .into(imageView);
-    }
-
-    private void getPhotoFromCamera(){
-        imageUriString = cameraImageUri.toString();
-        imageView.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_height);
-        Picasso.get()
-                .load(cameraImageUri)
-                .resize(533, 300)
-                .centerCrop()
-                .into(imageView);
-    }
-    /* ------------------------------------ Конец взаимодействий с активностью выбора ----------------------------------- */
-
-    /* SHARE --------------------------------- Взаимодействия с отправкой заметки --------------------------------------- */
-    private void setShareActionIntent(String text){
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, text);
-        shareActionProvider.setShareIntent(intent);
-    }
-    /* ------------------------------------ Конец взаимодействий с отправкой заметки ------------------------------------ */
-
-    /* IMAGE ----------------------------------- Взаимодействия с изображениями ----------------------------------------- */
-    public void addImage(View view){
-        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-        intent.setType("image/*");
-        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_GALLERY);
-    }
-    /* -------------------------------------- Конец взаимодействий с изображениями -------------------------------------- */
-
-    /* PHOTO -------------------------------------- Взаимодействия с камерой -------------------------------------------- */
-    public void addPhoto(View view){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE)){
-                callCameraApp();
-            }
-        } else {
-            callCameraApp();
-        }
-    }
-
-    private void callCameraApp(){
-        Intent cameraAppIntent = new Intent();
-        cameraAppIntent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-
-        File photoFile = null;
-        try {
-            photoFile = createImageFile();
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-
-        String authorities = getApplicationContext().getPackageName() + ".fileprovider";
-        cameraImageUri = FileProvider.getUriForFile(this, authorities, photoFile);
-
-        cameraAppIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri);
-        startActivityForResult(cameraAppIntent, START_CAMERA_APP);
-    }
-
-    private File createImageFile() throws IOException{
-        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "IMAGE_" + timeStamp + "_";
-        File storageDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-
-        return File.createTempFile(imageFileName, ".jpg", storageDirectory);
     }
 
     @Override
@@ -399,6 +317,55 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                 super.onRequestPermissionsResult(requestCode, permissions, grantResults);
                 break;
         }
+    }
+    /* ------------------------------------ Конец взаимодействий с активностью выбора ----------------------------------- */
+
+    /* SHARE --------------------------------- Взаимодействия с отправкой заметки --------------------------------------- */
+    private void setShareActionIntent(String text){
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, text);
+        shareActionProvider.setShareIntent(intent);
+    }
+    /* ------------------------------------ Конец взаимодействий с отправкой заметки ------------------------------------ */
+
+    /* IMAGE ----------------------------------- Взаимодействия с изображениями ----------------------------------------- */
+    public void addImage(View view){
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_GALLERY);
+    }
+
+    private void getImageFromGallery(Intent data){
+        originalUri = data.getData();
+
+        int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        getContentResolver().takePersistableUriPermission(originalUri, takeFlags);
+
+        imageUriString = originalUri.toString();
+        imageView.getLayoutParams().height = (int) getResources().getDimension(R.dimen.imageview_height);
+        Picasso.get()
+                .load(originalUri)
+                .resize(533, 300)
+                .centerCrop()
+                .into(imageView);
+    }
+    /* -------------------------------------- Конец взаимодействий с изображениями -------------------------------------- */
+
+    /* PHOTO -------------------------------------- Взаимодействия с камерой -------------------------------------------- */
+    public void addPhoto(View view){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE)){
+                callCameraApp();
+            }
+        } else {
+            callCameraApp();
+        }
+    }
+
+    private void callCameraApp(){
+        Intent cameraAppIntent = noteCamera.callCameraApp();
+        startActivityForResult(cameraAppIntent, START_CAMERA_APP);
     }
     /* ----------------------------------------- Конец взаимодействий с камерой ----------------------------------------- */
 
