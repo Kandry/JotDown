@@ -2,9 +2,11 @@ package com.kozyrev.jotdown_room;
 
 import android.arch.persistence.room.Room;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +21,7 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -76,6 +79,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     boolean isCard = true;
     boolean isSearch = false;
     List<RowType> items = new ArrayList<>();
+    ArrayMap<Integer, Note> removedNotes = new ArrayMap<>();
 
     NoteDB db;
 
@@ -206,7 +210,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new DisposableSubscriber<List<Note>>() {
                     @Override
                     public void onNext(List<Note> listNote) {
-                        Log.i("RxTest", "Next");
                         if (!isSearch) {
                             notesList = listNote;
                             if(notesRecycler.getAdapter() != null){
@@ -322,15 +325,42 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         selectionTracker.clearSelection();
 
         List<Integer> positions = ((CaptionedImagesAdapter) notesRecycler.getAdapter()).positions;
-        for (int position : positions){
-            deleteNote(position);
-        }
+        removedNotes.clear();
 
-        Toast.makeText(MainActivity.this, sizeSelection +" notes deleted", Toast.LENGTH_SHORT).show();
+        for (int position : positions){
+            removedNotes.put(position, notesList.get(position));
+        }
+        for (int position : positions){
+            notesList.remove(removedNotes.get(position));
+        }
+        updateAdapter();
+
+        Snackbar snackbar = Snackbar
+                .make(drawerLayout, sizeSelection + " notes deleted", Snackbar.LENGTH_LONG);
+        snackbar.addCallback(new Snackbar.Callback(){
+            @Override
+            public void onDismissed(Snackbar snackbar, int event) {
+                switch(event) {
+                    case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                        for (int position : positions){
+                            deleteNote(position);
+                        }
+                        break;
+                }
+            }
+        });
+        snackbar.setAction("UNDO", view -> {
+            for(int i = 0; i < removedNotes.size(); i++){
+                notesList.add(removedNotes.keyAt(i), removedNotes.valueAt(i));
+                updateAdapter();
+            }
+        });
+        snackbar.setActionTextColor(Color.YELLOW);
+        snackbar.show();
     }
 
     private void deleteNote(int position){
-        int noteId = notesList.get(position).getUid();
+        int noteId =  removedNotes.get(position).getUid(); // notesList.get(position).getUid();
         Note note = db.getNoteDAO().getNoteById(noteId);
 
         // РАЗРЕШЕНИЯ СПРОСИТЬ

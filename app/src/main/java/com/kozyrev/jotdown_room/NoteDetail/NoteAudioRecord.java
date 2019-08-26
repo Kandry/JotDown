@@ -1,8 +1,11 @@
 package com.kozyrev.jotdown_room.NoteDetail;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaRecorder;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.Adapter.RecordingAdapter;
@@ -30,7 +33,7 @@ public class NoteAudioRecord {
         this.noteId = noteId;
     }
 
-    public void fetchRecordings() {
+    public void fetchRecordings(View view) {
         File root = getRoot();
         File[] files = getNoteRecordsDirectoryFiles(root);
         if (files != null){
@@ -39,22 +42,41 @@ public class NoteAudioRecord {
                 addRecordToRecordingArrayList(i, root, files);
             }
         }
-        setAdapterToRecyclerView();
+        setAdapterToRecyclerView(view);
     }
 
-    private void setAdapterToRecyclerView(){
+    private void setAdapterToRecyclerView(View view){
         recordingAdapter = new RecordingAdapter(context,recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
         recordingAdapter.setRecordsListener(position -> {
-            File root = getRoot();
-            File[] files = getNoteRecordsDirectoryFiles(root);
 
-            File recordFile = new File(files[position].getAbsolutePath());
-            recordFile.delete();
+            Recording recording = recordingArraylist.get(position);
 
             recordingArraylist.remove(position);
             recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
-            Toast.makeText(context, "Record deleted", Toast.LENGTH_SHORT).show();
+
+            Snackbar snackbar = Snackbar
+                    .make(view, "Record deleted", Snackbar.LENGTH_LONG);
+            snackbar.addCallback(new Snackbar.Callback(){
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    switch(event) {
+                        case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                            File root = getRoot();
+                            File[] files = getNoteRecordsDirectoryFiles(root);
+
+                            File recordFile = new File(files[position].getAbsolutePath());
+                            recordFile.delete();
+                            break;
+                    }
+                }
+            });
+            snackbar.setAction("UNDO", v -> {
+                recordingArraylist.add(position, recording);
+                recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
         });
     }
 
