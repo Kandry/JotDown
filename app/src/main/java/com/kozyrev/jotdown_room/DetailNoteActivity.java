@@ -45,6 +45,7 @@ import com.kozyrev.jotdown_room.Adapter.RecordingAdapter;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
+import com.kozyrev.jotdown_room.NoteDetail.NoteAudioRecord;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -93,6 +94,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private MediaRecorder mediaRecorder;
     private Chronometer chronometer;
     private RecordingAdapter recordingAdapter;
+    private NoteAudioRecord noteAudioRecord;
 
     private int noteId;
     private String imageUriString;
@@ -102,7 +104,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private Uri cameraImageUri;
     Uri originalUri;
     private Date alarmTime = null;
-    private String audioRecordFileName = null;
     private ArrayList<Recording> recordingArraylist;
 
     /* ACTIVITY_LIFE_CYCLE --------------- Взаимодействия с жизненным циклом активности ---------------------------------- */
@@ -134,7 +135,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         // RxAndroid
         // Загружаем записи. Нужно переделать под RxAndroid, шоб ассинхронно и налету
-        fetchRecordings();
+        noteAudioRecord = new NoteAudioRecord(getApplicationContext(), recyclerViewRecordings, mediaRecorder, recordingArraylist, noteId);
+        noteAudioRecord.fetchRecordings();
     }
 
     @Override
@@ -248,10 +250,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         isRecord = !isRecord;
         if (isRecord) {
             prepareForRecording();
-            startRecording();
+            noteAudioRecord.startRecording();
         } else {
             prepareForStop();
-            stopRecording();
+            noteAudioRecord.stopRecording();
         }
     }
 
@@ -552,102 +554,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         // Ограничить доступность остальных действий
     }
 
-    private void startRecording(){
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-
-        File root = getRoot();
-        File file = new File(root.getAbsolutePath() + "/VoiceRecords/Note" + noteId);
-        if (!file.exists()){
-            file.mkdirs();
-        }
-
-        audioRecordFileName = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + String.valueOf(System.currentTimeMillis() + ".mp3");
-        mediaRecorder.setOutputFile(audioRecordFileName);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-
-        if (recordingAdapter != null) recordingAdapter.notifyStopPlaying();
-
-        try{
-            mediaRecorder.prepare();
-            mediaRecorder.start();
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }
-    }
-
     private void prepareForStop(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
         // Снять ограничение доступности остальных действий
-    }
-
-    private void stopRecording(){
-        try {
-            mediaRecorder.stop();
-            mediaRecorder.release();
-
-            File root = getRoot();
-            File[] files = getNoteRecordsDirectoryFiles(root);
-            addRecordToRecordingArrayList(files.length - 1, root, files);
-
-            recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
-            Toast.makeText(getApplicationContext(), "Record added", Toast.LENGTH_SHORT).show();
-
-        } catch(Exception ex){
-            ex.printStackTrace();
-        }
-
-        mediaRecorder = null;
-    }
-
-    private void fetchRecordings() {
-        File root = getRoot();
-        File[] files = getNoteRecordsDirectoryFiles(root);
-        if (files != null){
-
-            for (int i = 0; i < files.length; i++) {
-                addRecordToRecordingArrayList(i, root, files);
-            }
-        }
-
-        setAdapterToRecyclerView();
-    }
-
-    private void setAdapterToRecyclerView(){
-        recordingAdapter = new RecordingAdapter(this,recordingArraylist);
-        recyclerViewRecordings.setAdapter(recordingAdapter);
-        recordingAdapter.setRecordsListener(new RecordingAdapter.RecordsListener() {
-            @Override
-            public void onLongClick(int position) {
-                File root = getRoot();
-                File[] files = getNoteRecordsDirectoryFiles(root);
-
-                File recordFile = new File(files[position].getAbsolutePath());
-                recordFile.delete();
-
-                recordingArraylist.remove(position);
-                recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
-                Toast.makeText(getApplicationContext(), "Record deleted", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    private File getRoot(){
-        return android.os.Environment.getExternalStorageDirectory();
-    }
-
-    private File[] getNoteRecordsDirectoryFiles(File root){
-        String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
-        File directory = new File(path);
-        return directory.listFiles();
-    }
-
-    private void addRecordToRecordingArrayList(int i, File root, File[] files){
-        String fileName = files[i].getName();
-        String recordingUri = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + fileName;
-        Recording recording = new Recording(recordingUri, fileName, false);
-        recordingArraylist.add(recording);
     }
     /* -------------------------------------- Конец взаимодействий с аудиозаписями -------------------------------------- */
 }

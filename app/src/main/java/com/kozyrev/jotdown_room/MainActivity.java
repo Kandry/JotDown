@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
             case R.id.action_search:
-                createSearch();
+                getSearch();
                 return true;
             case R.id.action_choose_list_view:
                 showPopupMenu(findViewById(R.id.action_choose_list_view));
@@ -188,6 +188,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+        if(isSearch) getSearch();
+    }
+
+    @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
         selectionTracker.onSaveInstanceState(outState);
@@ -234,35 +240,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         CaptionedImagesAdapter adapter = new CaptionedImagesAdapter(items);
         notesRecycler.setAdapter(adapter);
 
-        /*
-        adapter.setListener(new CaptionedImagesAdapter.Listener() {
-            @Override
-            public void onClick(int position) {
-                Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
-                intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(position).getUid());
-                startActivity(intent);
-            }
+        buildSelectionTracker();
+        adapter.setSelectionTracker(selectionTracker);
+        addObserverSelectionTracker();
+    }
 
-            @Override
-            public void onLongClick(int position) {
-                int noteId = notesList.get(position).getUid();
-                Note note = db.getNoteDAO().getNoteById(noteId);
-
-                // РАЗРЕШЕНИЯ СПРОСИТЬ
-                File root = android.os.Environment.getExternalStorageDirectory();
-                String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
-                File directory = new File(path);
-                File[] files = directory.listFiles();
-                for (File file : files){
-                    file.delete();
-                }
-                directory.delete();
-
-                db.getNoteDAO().delete(note);
-                Toast.makeText(MainActivity.this, "Note deleted", Toast.LENGTH_SHORT).show();
-            }
-        });*/
-
+    private void buildSelectionTracker(){
         selectionTracker = new SelectionTracker.Builder<>(
                 "noteSelectionId",
                 notesRecycler,
@@ -287,8 +270,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }
                 })
                 .build();
+    }
 
-        adapter.setSelectionTracker(selectionTracker);
+    private void addObserverSelectionTracker(){
         selectionTracker.addObserver(new SelectionTracker.SelectionObserver() {
             @Override
             public void onItemStateChanged(@NonNull Object key, boolean selected) {
@@ -320,8 +304,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
 
                 Iterator<RowType> itemIterable = selectionTracker.getSelection().iterator();
-
-
                 while (itemIterable.hasNext()){
                     Log.d("select+++", itemIterable.next().toString());
                     Log.d("select-", "Click4");
@@ -398,36 +380,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    private void createSearch(){
+    private void getSearch(){
         isSearch = !isSearch;
 
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) searchEditText.getLayoutParams();
 
-        if(isSearch) {
-            setEditTextLayoutParams(params, (int) getResources().getDimension(R.dimen.searchEditText_height), (int) getResources().getDimension(R.dimen.margin_top));
-            searchEditText.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-                @Override
-                public void afterTextChanged(Editable s) {
-                    String searchText = searchEditText.getText().toString();
-                    maybeSearchNotes(searchText);
-                }
-            });
-        } else {
-            int nullDimen = (int) getResources().getDimension(R.dimen.height_null);
-            setEditTextLayoutParams(params, nullDimen, nullDimen);
-            searchEditText.setText("");
-            flowableAllNotes();
-        }
+        if(isSearch) { createSearch(params); }
+        else { deleteSearch(params); }
 
         searchEditText.setLayoutParams(params);
     }
+    
+    private void createSearch(LinearLayout.LayoutParams params){
+        setEditTextLayoutParams(params, (int) getResources().getDimension(R.dimen.searchEditText_height), (int) getResources().getDimension(R.dimen.margin_top));
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String searchText = searchEditText.getText().toString();
+                maybeSearchNotes(searchText);
+            }
+        });
+    }
+
+    private void deleteSearch(LinearLayout.LayoutParams params){
+        int nullDimen = (int) getResources().getDimension(R.dimen.height_null);
+        setEditTextLayoutParams(params, nullDimen, nullDimen);
+        searchEditText.setText("");
+        flowableAllNotes();
+    }
+    
     private void setEditTextLayoutParams(LinearLayout.LayoutParams params, int height, int topMargin){
         params.height = height;
         params.topMargin = topMargin;
@@ -453,11 +440,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onComplete() {}
         };
         notesMaybe.subscribe(observer);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if(isSearch) createSearch();
     }
 }
