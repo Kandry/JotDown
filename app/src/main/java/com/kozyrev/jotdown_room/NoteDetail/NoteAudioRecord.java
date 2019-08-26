@@ -20,12 +20,12 @@ public class NoteAudioRecord {
     private MediaRecorder mediaRecorder;
     private RecordingAdapter recordingAdapter;
     private ArrayList<Recording> recordingArraylist;
+
     private int noteId;
 
-    public NoteAudioRecord(Context context, RecyclerView recyclerViewRecordings, MediaRecorder mediaRecorder, ArrayList<Recording> recordingArraylist, int noteId){
+    public NoteAudioRecord(Context context, RecyclerView recyclerViewRecordings, ArrayList<Recording> recordingArraylist, int noteId){
         this.context = context;
         this.recyclerViewRecordings = recyclerViewRecordings;
-        this.mediaRecorder = mediaRecorder;
         this.recordingArraylist = recordingArraylist;
         this.noteId = noteId;
     }
@@ -45,19 +45,16 @@ public class NoteAudioRecord {
     private void setAdapterToRecyclerView(){
         recordingAdapter = new RecordingAdapter(context,recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
-        recordingAdapter.setRecordsListener(new RecordingAdapter.RecordsListener() {
-            @Override
-            public void onLongClick(int position) {
-                File root = getRoot();
-                File[] files = getNoteRecordsDirectoryFiles(root);
+        recordingAdapter.setRecordsListener(position -> {
+            File root = getRoot();
+            File[] files = getNoteRecordsDirectoryFiles(root);
 
-                File recordFile = new File(files[position].getAbsolutePath());
-                recordFile.delete();
+            File recordFile = new File(files[position].getAbsolutePath());
+            recordFile.delete();
 
-                recordingArraylist.remove(position);
-                recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
-                Toast.makeText(context, "Record deleted", Toast.LENGTH_SHORT).show();
-            }
+            recordingArraylist.remove(position);
+            recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+            Toast.makeText(context, "Record deleted", Toast.LENGTH_SHORT).show();
         });
     }
 
@@ -105,17 +102,17 @@ public class NoteAudioRecord {
         mediaRecorder = null;
     }
 
-    public File getRoot(){
+    private File getRoot(){
         return android.os.Environment.getExternalStorageDirectory();
     }
 
-    public File[] getNoteRecordsDirectoryFiles(File root){
+    private File[] getNoteRecordsDirectoryFiles(File root){
         String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
         File directory = new File(path);
         return directory.listFiles();
     }
 
-    public void addRecordToRecordingArrayList(int i, File root, File[] files){
+    private void addRecordToRecordingArrayList(int i, File root, File[] files){
         String fileName = files[i].getName();
         String recordingUri = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + fileName;
         Recording recording = new Recording(recordingUri, fileName, false);

@@ -86,10 +86,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initViews();
         initDB();
-
+/*
         if (savedInstanceState != null) {
             selectionTracker.onRestoreInstanceState(savedInstanceState);
-        }
+        }*/
     }
 
     private void initViews(){

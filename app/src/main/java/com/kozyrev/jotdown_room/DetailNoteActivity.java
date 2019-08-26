@@ -2,14 +2,10 @@ package com.kozyrev.jotdown_room;
 
 import android.Manifest;
 import android.app.AlarmManager;
-import android.app.DatePickerDialog;
-import android.app.PendingIntent;
-import android.app.TimePickerDialog;
 import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -33,19 +29,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Chronometer;
-import android.widget.DatePicker;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.TimePicker;
 import android.widget.Toast;
 
-import com.kozyrev.jotdown_room.Adapter.RecordingAdapter;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAudioRecord;
+import com.kozyrev.jotdown_room.NoteDetail.NoteAlarm;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -59,11 +53,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 
-import static android.app.PendingIntent.FLAG_CANCEL_CURRENT;
-
 public class DetailNoteActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
-
-    static final int RQS_TIME = 10;
 
     private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 100;
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 101;
@@ -91,15 +81,13 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private Calendar calendar = Calendar.getInstance();
     private ShareActionProvider shareActionProvider;
-    private MediaRecorder mediaRecorder;
     private Chronometer chronometer;
-    private RecordingAdapter recordingAdapter;
     private NoteAudioRecord noteAudioRecord;
+    private NoteAlarm noteAlarm;
 
     private int noteId;
     private String imageUriString;
     private boolean notImageAdding = true;
-    private boolean isAlarmUpdating = false;
     private boolean isRecord = false;
     private Uri cameraImageUri;
     Uri originalUri;
@@ -128,14 +116,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                                 ? (int) getIntent().getExtras().get(EXTRA_NOTE_ID)
                                 : -1);
 
+        noteAlarm = new NoteAlarm(getApplicationContext(), this, calendar, alarmTime, alarmTextView, (int) getResources().getDimension(R.dimen.searchEditText_height));
+
         downloadData();
         initViewsListeners();
 
         if (noteId < 0) noteId = (int) addNote();
 
-        // RxAndroid
-        // Загружаем записи. Нужно переделать под RxAndroid, шоб ассинхронно и налету
-        noteAudioRecord = new NoteAudioRecord(getApplicationContext(), recyclerViewRecordings, mediaRecorder, recordingArraylist, noteId);
+        noteAudioRecord = new NoteAudioRecord(getApplicationContext(), recyclerViewRecordings, recordingArraylist, noteId);
         noteAudioRecord.fetchRecordings();
     }
 
@@ -208,10 +196,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                 if (note.getAlarmTime() != 0){
                     alarmTime = new Date(note.getAlarmTime());
                     if (alarmTime.compareTo(new Date()) < 1) {
-                        cancelAlarm(alarmTime.toString());
+                        noteAlarm.cancelAlarm(alarmTime.toString(), (AlarmManager) getSystemService(Context.ALARM_SERVICE));
                     } else {
                         calendar.setTime(alarmTime);
-                        setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
+                        noteAlarm.setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
                         alarmTextView.setText(alarmTime.toString());
                     }
                 }
@@ -225,11 +213,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private void initViewsListeners(){
         alarmTextView.setOnClickListener(v -> {
-            updateAlarm();
+            noteAlarm.updateAlarm();
         });
 
         alarmTextView.setOnLongClickListener(v -> {
-            cancelAlarm(alarmTime.toString());
+            noteAlarm.cancelAlarm(alarmTime.toString(), (AlarmManager) getSystemService(Context.ALARM_SERVICE));
             alarmTextView.setText("");
             Toast.makeText(getApplicationContext(), R.string.alarm_canceled_message, Toast.LENGTH_LONG).show();
             return true;
@@ -244,17 +232,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                 recordButtonClick();
             }
         });
-    }
-
-    private void recordButtonClick(){
-        isRecord = !isRecord;
-        if (isRecord) {
-            prepareForRecording();
-            noteAudioRecord.startRecording();
-        } else {
-            prepareForStop();
-            noteAudioRecord.stopRecording();
-        }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -283,7 +260,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         switch (item.getItemId()){
             case R.id.action_create_notify:
                 alarmTextView.setText("");
-                openDatePickerDialog(null);
+                noteAlarm.openDatePickerDialog(null);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -354,24 +331,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* ------------------------------------ Конец взаимодействий с отправкой заметки ------------------------------------ */
 
     /* IMAGE ----------------------------------- Взаимодействия с изображениями ----------------------------------------- */
-    public void addImage(){
+    public void addImage(View view){
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), REQUEST_GALLERY);
     }
     /* -------------------------------------- Конец взаимодействий с изображениями -------------------------------------- */
 
-    public void addPicture(View view){
-        notImageAdding = false;
-        if (view == cameraButton){
-            addPhoto();
-        } else if (view == imageButton) {
-            addImage();
-        }
-    }
-
     /* PHOTO -------------------------------------- Взаимодействия с камерой -------------------------------------------- */
-    public void addPhoto(){
+    public void addPhoto(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE)){
                 callCameraApp();
@@ -437,8 +405,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* DATABASE ------------------------------------- Взаимодействия с БД ----------------------------------------------- */
     private long addNote(){
         Note note = new Note(title.getText().toString(), description.getText().toString(), imageUriString);
-        //isNowCalendar();
-        //setAlarmText(note);
         return db.getNoteDAO().insert(note);
     }
 
@@ -454,7 +420,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private  void isNowCalendar(){
         if (calendar.getTime().compareTo(Calendar.getInstance().getTime()) > 0) {
-            setAlarm(calendar);
+            noteAlarm.setAlarm(calendar, (AlarmManager) getSystemService(Context.ALARM_SERVICE), noteId, title.getText().toString(), description.getText().toString(), imageUriString);
         }
     }
 
@@ -464,89 +430,20 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
 
     /* ALARM ------------------------------------ Взаимодействия с будильником ------------------------------------------ */
-    DatePickerDialog.OnDateSetListener onDateSetListener = (DatePicker datePicker, int year, int month, int dayOfMonth) -> {
-            calendar.set(Calendar.YEAR, year);
-            calendar.set(Calendar.MONTH, month);
-            calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-            openTimePickerDialog();
-    };
-
-    TimePickerDialog.OnTimeSetListener onTimeSetListener = (TimePicker timePicker, int hourOfDay, int minute) -> {
-            calendar.set(Calendar.HOUR_OF_DAY, hourOfDay);
-            calendar.set(Calendar.MINUTE, minute);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-
-            setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
-            alarmTextView.setText(calendar.getTime().toString());
-    };
-
-    private void openDatePickerDialog(Date updateDate){
-        if (updateDate != null) calendar.setTime(updateDate);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, onDateSetListener,
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH));
-        datePickerDialog.setTitle("Выберите дату");
-        datePickerDialog.show();
-    }
-
-    private void openTimePickerDialog(){
-        TimePickerDialog timePickerDialog = new TimePickerDialog(this, onTimeSetListener,
-                calendar.get(Calendar.HOUR_OF_DAY),
-                calendar.get(Calendar.MINUTE), true);
-        timePickerDialog.setTitle("Выберите время");
-        timePickerDialog.show();
-    }
-
-    private void setAlarm(Calendar targetCal){
-        alarmTime = targetCal.getTime();
-        String alarmText = alarmTime.toString();
-
-        if (isAlarmUpdating) cancelAlarm(alarmText);
-
-        newAlarmIntent(alarmText, targetCal);
-    }
-
-    private void newAlarmIntent(String alarmText, Calendar targetCal){
-        Intent intent = new Intent(getApplicationContext(), AlarmReceiver.class);
-        intent.putExtra(AlarmReceiver.EXTRA_NOTE_ID, noteId);
-        intent.putExtra(AlarmReceiver.EXTRA_TITLE, title.getText().toString());
-        intent.putExtra(AlarmReceiver.EXTRA_CONTENT_TEXT, description.getText().toString());
-        intent.putExtra(AlarmReceiver.EXTRA_URI, imageUriString);
-        intent.setAction(alarmText);
-
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
-    }
-
-    private void updateAlarm(){
-        isAlarmUpdating = true;
-        openDatePickerDialog(alarmTime);
-    }
-
-    private void cancelAlarm(String alarmText){
-        if (isAlarmUpdating) isAlarmUpdating = false;
-        else setAlarmTextViewParams((int) getResources().getDimension(R.dimen.height_null));
-
-        Intent intent = new Intent(getApplicationContext(),  AlarmReceiver.class);
-        intent.setAction(alarmText);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(getApplicationContext(), RQS_TIME, intent, FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        alarmManager.cancel(pendingIntent);
-    }
-
-    private void setAlarmTextViewParams(int height){
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) alarmTextView.getLayoutParams();
-        params.height = height;
-        alarmTextView.setLayoutParams(params);
-    }
-
     /* --------------------------------------- Конец взаимодействий с будильником --------------------------------------- */
 
     /* AUDIO ----------------------------------- Взаимодействия с аудиозаписями ----------------------------------------- */
+    private void recordButtonClick(){
+        isRecord = !isRecord;
+        if (isRecord) {
+            prepareForRecording();
+            noteAudioRecord.startRecording();
+        } else {
+            prepareForStop();
+            noteAudioRecord.stopRecording();
+        }
+    }
+
     private void prepareForRecording(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
         int audioButtonColor = getResources().getColor(R.color.colorAccent);
