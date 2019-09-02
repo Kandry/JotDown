@@ -1,12 +1,15 @@
 package com.kozyrev.jotdown_room;
 
+import android.app.SearchManager;
 import android.arch.persistence.room.Room;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -20,6 +23,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.util.Log;
@@ -29,6 +33,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.support.v7.widget.SearchView;
 import android.widget.Toast;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
@@ -58,13 +63,15 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subscribers.DisposableSubscriber;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener{
 
     RecyclerView notesRecycler;
     EditText searchEditText;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
+    SearchView searchView;
+
     SelectionTracker selectionTracker;
     ActionMode actionMode;
     Menu menu;
@@ -113,8 +120,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler.setLayoutManager(layoutManager);
         notesRecycler.setItemAnimator(new DefaultItemAnimator());
         notesRecycler.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
-
-        searchEditText = (EditText) findViewById(R.id.searchEditText);
     }
 
     private void initDB(){
@@ -127,21 +132,39 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_main_toolbar, menu);
         this.menu = menu;
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+
         itemSearch = menu.findItem(R.id.action_search);
         itemChooseListView = menu.findItem(R.id.action_choose_list_view);
         itemSelectCount = menu.findItem(R.id.action_item_count);
         itemClear = menu.findItem(R.id.action_clear);
         itemDelete = menu.findItem(R.id.action_delete);
 
+        searchView = (SearchView) itemSearch.getActionView();
+        searchView.setOnQueryTextListener(this);
+
         return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        if (TextUtils.isEmpty(newText)) {
+            deleteSearch();
+        } else {
+            createSearch(newText);
+        }
+        return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item){
         switch (item.getItemId()){
-            case R.id.action_search:
-                getSearch();
-                return true;
             case R.id.action_choose_list_view:
                 showPopupMenu(findViewById(R.id.action_choose_list_view));
                 return true;
@@ -192,9 +215,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (searchView != null) {
+            String a = searchView.getQuery().toString();
+            if (TextUtils.isEmpty(searchView.getQuery().toString())) {
+                deleteSearch();
+            } else {
+                createSearch(searchView.getQuery().toString());
+            }
+        }
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
-        if(isSearch) getSearch();
     }
 
     @Override
@@ -212,7 +247,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onNext(List<Note> listNote) {
                         if (!isSearch) {
                             notesList = listNote;
-                            if(notesRecycler.getAdapter() != null){
+                            if(notesRecycler.getAdapter() != null && !isSearch){
                                 updateAdapter();
                             } else {
                                 createAdapter();
@@ -409,39 +444,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         }
     }
-
-    private void getSearch(){
-        isSearch = !isSearch;
-
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) searchEditText.getLayoutParams();
-
-        if(isSearch) { createSearch(params); }
-        else { deleteSearch(params); }
-
-        searchEditText.setLayoutParams(params);
-    }
     
-    private void createSearch(LinearLayout.LayoutParams params){
-        setEditTextLayoutParams(params, (int) getResources().getDimension(R.dimen.searchEditText_height), (int) getResources().getDimension(R.dimen.margin_top));
-        searchEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                String searchText = searchEditText.getText().toString();
-                maybeSearchNotes(searchText);
-            }
-        });
+    private void createSearch(String searchText){
+        isSearch = true;
+        maybeSearchNotes(searchText);
     }
 
-    private void deleteSearch(LinearLayout.LayoutParams params){
-        int nullDimen = (int) getResources().getDimension(R.dimen.height_null);
-        setEditTextLayoutParams(params, nullDimen, nullDimen);
-        searchEditText.setText("");
+    private void deleteSearch(){
+        isSearch = false;
         flowableAllNotes();
     }
     

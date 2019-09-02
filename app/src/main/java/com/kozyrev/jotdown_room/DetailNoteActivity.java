@@ -14,6 +14,7 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -32,6 +33,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
@@ -123,6 +125,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
         noteAudioRecord.fetchRecordings();
+
+        DetailNotePagerAdapter viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager());
+        ViewPager viewPager = findViewById(R.id.viewpager);
+        viewPager.setAdapter(viewPagerAdapter);
+        viewPager.setCurrentItem(0);
     }
 
     @Override

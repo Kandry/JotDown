@@ -23,11 +23,12 @@
         android:visible="false"
         app:showAsAction="ifRoom" />
 
-    <item android:id="@+id/action_search"
-        android:title="@string/action_search"
+    <item
+        android:id="@+id/action_search"
         android:icon="@android:drawable/ic_menu_search"
-        android:orderInCategory="2"
-        app:showAsAction="ifRoom" />
+        android:title="@string/action_search"
+        app:actionViewClass="android.support.v7.widget.SearchView"
+        app:showAsAction="ifRoom|collapseActionView"/>
 
     <item android:id="@+id/action_choose_list_view"
         android:title="@string/action_choose_list_view"
