@@ -399,6 +399,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     }
 
     private void setAlarmText(Note note){
+        if (noteAlarm.getAlarmTime() != null) alarmTime = noteAlarm.getAlarmTime();
         if (alarmTime != null) note.setAlarmTime(alarmTime.getTime());
     }
     /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */

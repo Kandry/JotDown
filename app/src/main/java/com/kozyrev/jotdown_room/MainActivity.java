@@ -132,34 +132,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu){
         getMenuInflater().inflate(R.menu.menu_main_toolbar, menu);
         this.menu = menu;
-
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-
         itemSearch = menu.findItem(R.id.action_search);
         itemChooseListView = menu.findItem(R.id.action_choose_list_view);
         itemSelectCount = menu.findItem(R.id.action_item_count);
         itemClear = menu.findItem(R.id.action_clear);
         itemDelete = menu.findItem(R.id.action_delete);
 
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) itemSearch.getActionView();
         searchView.setOnQueryTextListener(this);
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onQueryTextSubmit(String query) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String newText) {
-        if (TextUtils.isEmpty(newText)) {
-            deleteSearch();
-        } else {
-            createSearch(newText);
-        }
-        return true;
     }
 
     @Override
@@ -228,11 +211,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
         selectionTracker.onSaveInstanceState(outState);
@@ -247,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     public void onNext(List<Note> listNote) {
                         if (!isSearch) {
                             notesList = listNote;
-                            if(notesRecycler.getAdapter() != null && !isSearch){
+                            if(notesRecycler.getAdapter() != null){
                                 updateAdapter();
                             } else {
                                 createAdapter();
@@ -264,10 +242,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void onClickAdd(View view) {
-        addNewNote();
-    }
-
-    private void addNewNote(){
         Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
         startActivity(intent);
     }
@@ -377,8 +351,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onDismissed(Snackbar snackbar, int event) {
                 switch(event) {
                     case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
-                        for (int position : positions){
-                            deleteNote(position);
+                        for (int i = 0; i < removedNotes.size(); i++){
+                            deleteNote(removedNotes.keyAt(i));
                         }
                         break;
                 }
@@ -443,6 +417,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 items.add(new TextRowType(note));
             }
         }
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        if (TextUtils.isEmpty(newText)) {
+            deleteSearch();
+        } else {
+            createSearch(newText);
+        }
+        return true;
     }
     
     private void createSearch(String searchText){

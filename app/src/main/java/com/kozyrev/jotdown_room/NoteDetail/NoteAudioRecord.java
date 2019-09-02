@@ -36,7 +36,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
         this.recordingArraylist = recordingArraylist;
         this.noteId = noteId;
 
-        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecordItemTouchHelper(0, ItemTouchHelper.LEFT, this);
+        ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecordItemTouchHelper(0, ItemTouchHelper.RIGHT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewRecordings);
     }
 

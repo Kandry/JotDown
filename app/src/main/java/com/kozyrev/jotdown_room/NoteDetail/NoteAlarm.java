@@ -58,7 +58,8 @@ public class NoteAlarm {
         calendar.set(Calendar.MILLISECOND, 0);
 
         setAlarmTextViewParams(alarmTextViewHeight);
-        alarmTextView.setText(calendar.getTime().toString());
+        alarmTime = calendar.getTime();
+        alarmTextView.setText(alarmTime.toString());
     };
 
     public void openDatePickerDialog(Date updateDate){
@@ -122,5 +123,9 @@ public class NoteAlarm {
         LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) alarmTextView.getLayoutParams();
         params.height = height;
         alarmTextView.setLayoutParams(params);
+    }
+
+    public Date getAlarmTime(){
+        return alarmTime;
     }
 }
