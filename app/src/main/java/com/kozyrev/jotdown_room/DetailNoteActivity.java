@@ -13,9 +13,13 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -37,6 +41,7 @@ import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
+import com.kozyrev.jotdown_room.Fragments.RecordingFragment;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAudioRecord;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAlarm;
 import com.kozyrev.jotdown_room.NoteDetail.NoteCamera;
@@ -66,6 +71,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
     private Toolbar toolbar;
+    private NestedScrollView nestedScrollView;
     private ImageView imageView;
     private TextInputEditText title;
     private TextInputEditText description;
@@ -123,6 +129,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         if (noteId < 0) noteId = (int) addNote();
 
         noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
+
+
+
+
         noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
         noteAudioRecord.fetchRecordings();
 
@@ -130,6 +140,18 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         ViewPager viewPager = findViewById(R.id.viewpager);
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.setCurrentItem(0);
+
+       // if (noteAudioRecord.getRecordingsCount() > 0) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction ft = fragmentManager.beginTransaction();
+
+            RecordingFragment recordingFragment = new RecordingFragment();
+            ft.add(R.id.fragmentContainer, recordingFragment, "recordingFragment");
+            ft.commit();
+      //  }
+        //RecordingFragment recordingFragment = (RecordingFragment)
+
+
     }
 
     @Override
@@ -150,6 +172,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
+
+        nestedScrollView = (NestedScrollView) findViewById(R.id.nextedScrollView);
+        nestedScrollView.setFillViewport(true);
 
         navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);

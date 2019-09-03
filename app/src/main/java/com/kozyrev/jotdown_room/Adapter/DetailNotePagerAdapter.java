@@ -22,11 +22,11 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position){
         switch (position){
             case 0:
-                return new NotesFileFragment();
-            case 1:
                 return new RecordingFragment();
+            case 1:
+                return new NotesFileFragment();
             default:
-                return null;
+                return new RecordingFragment();
         }
     }
 }

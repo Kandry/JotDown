@@ -154,4 +154,8 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             snackbar.show();
         }
     }
+
+    public int getRecordingsCount(){
+        return recordingArraylist.size();
+    }
 }
