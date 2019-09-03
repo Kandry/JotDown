@@ -6,6 +6,7 @@ import android.media.MediaRecorder;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -131,8 +132,11 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             snackbar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar snackbar, int event) {
+                    Log.d("test1", "audio del");
                     switch (event) {
-                        case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                        case DISMISS_EVENT_TIMEOUT:
+                        case DISMISS_EVENT_CONSECUTIVE:
+                        case DISMISS_EVENT_MANUAL:
                             File root = getRoot();
                             File[] files = getNoteRecordsDirectoryFiles(root);
 

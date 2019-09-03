@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
@@ -33,6 +34,7 @@ public class NoteAlarm {
 
     private TextView alarmTextView;
     private View rootView;
+    Snackbar snackbar;
 
     private Calendar calendar;
     private Date alarmTime;
@@ -65,13 +67,15 @@ public class NoteAlarm {
             alarmTextView.setText("");
             setAlarmTextViewParams(0);
 
-            Snackbar snackbar = Snackbar
+            snackbar = Snackbar
                     .make(rootView, R.string.alarm_canceled_message, Snackbar.LENGTH_LONG);
             snackbar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar snackbar, int event) {
                     switch (event) {
-                        case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                        case DISMISS_EVENT_TIMEOUT:
+                        case DISMISS_EVENT_CONSECUTIVE:
+                        case DISMISS_EVENT_MANUAL:
                             cancelAlarm(alarmTime.toString());
                             break;
                     }
