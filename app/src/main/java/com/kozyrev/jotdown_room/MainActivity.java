@@ -201,7 +201,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onResume() {
         super.onResume();
         if (searchView != null) {
-            String a = searchView.getQuery().toString();
             if (TextUtils.isEmpty(searchView.getQuery().toString())) {
                 deleteSearch();
             } else {
@@ -277,7 +276,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .withOnDragInitiatedListener(new OnDragInitiatedListener() {
                     @Override
                     public boolean onDragInitiated(@NonNull MotionEvent motionEvent) {
-                        Log.d("select-", "onDragInitiated");
                         return true;
                     }
                 })
@@ -300,16 +298,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSelectionChanged() {
                 super.onSelectionChanged();
                 if(selectionTracker.hasSelection() && actionMode == null){
-                    Log.d("select-", "Click1");
                     actionMode = startSupportActionMode(new ActionModeController(MainActivity.this, selectionTracker));
                     setMenuVisisble(true);
                     setMenuItemTitle(selectionTracker.getSelection().size());
                 } else if (!selectionTracker.hasSelection() && actionMode != null){
-                    Log.d("select-", "Click2");
                     actionMode.finish();
                     actionMode = null;
                 } else {
-                    Log.d("select-", "Click3");
                     setMenuVisisble(false);
                     setMenuItemTitle(selectionTracker.getSelection().size());
                     selectionTracker.clearSelection();
@@ -442,11 +437,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void deleteSearch(){
         isSearch = false;
         flowableAllNotes();
-    }
-    
-    private void setEditTextLayoutParams(LinearLayout.LayoutParams params, int height, int topMargin){
-        params.height = height;
-        params.topMargin = topMargin;
     }
 
     private void maybeSearchNotes(String searchText){

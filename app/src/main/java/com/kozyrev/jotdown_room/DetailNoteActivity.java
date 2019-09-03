@@ -89,7 +89,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private boolean notImageAdding = true;
     private boolean isRecord = false;
     Uri originalUri;
-    private Date alarmTime = null;
+    private Date alarmTime = new Date();
     private ArrayList<Recording> recordingArraylist;
 
     /* ACTIVITY_LIFE_CYCLE --------------- Взаимодействия с жизненным циклом активности ---------------------------------- */
@@ -114,15 +114,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                                 ? (int) getIntent().getExtras().get(EXTRA_NOTE_ID)
                                 : -1);
 
-        noteAlarm = new NoteAlarm(getApplicationContext(), this, calendar, alarmTime, alarmTextView, (int) getResources().getDimension(R.dimen.searchEditText_height));
+        noteAlarm = new NoteAlarm(getApplicationContext(), this, calendar, alarmTime, alarmTextView, (int) getResources().getDimension(R.dimen.searchEditText_height),
+                (AlarmManager) getSystemService(Context.ALARM_SERVICE), drawerLayout);
+        noteAlarm.initAlarmListeners();
 
         downloadData();
-        initViewsListeners();
-
-        noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
 
         if (noteId < 0) noteId = (int) addNote();
 
+        noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
         noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
         noteAudioRecord.fetchRecordings();
 
@@ -200,8 +200,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                 }
                 if (note.getAlarmTime() != 0){
                     alarmTime = new Date(note.getAlarmTime());
+                    noteAlarm.setAlarmTime(alarmTime);
                     if (alarmTime.compareTo(new Date()) < 1) {
-                        noteAlarm.cancelAlarm(alarmTime.toString(), (AlarmManager) getSystemService(Context.ALARM_SERVICE));
+                        noteAlarm.cancelAlarm(alarmTime.toString());
                     } else {
                         calendar.setTime(alarmTime);
                         noteAlarm.setAlarmTextViewParams((int) getResources().getDimension(R.dimen.searchEditText_height));
@@ -214,29 +215,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             public void onError(Throwable e) {e.printStackTrace();}
         };
         noteSingle.subscribe(observer);
-    }
-
-    private void initViewsListeners(){
-        alarmTextView.setOnClickListener(v -> {
-            noteAlarm.updateAlarm();
-        });
-
-        alarmTextView.setOnLongClickListener(v -> {
-            noteAlarm.cancelAlarm(alarmTime.toString(), (AlarmManager) getSystemService(Context.ALARM_SERVICE));
-            alarmTextView.setText("");
-            Toast.makeText(getApplicationContext(), R.string.alarm_canceled_message, Toast.LENGTH_LONG).show();
-            return true;
-        });
-
-        audioRecordingButton.setOnClickListener(view -> {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
-                    recordButtonClick();
-                }
-            } else {
-                recordButtonClick();
-            }
-        });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -387,27 +365,38 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         note.setName(title.getText().toString());
         note.setDescription(description.getText().toString());
         note.setImageResourceUri(imageUriString);
-        isNowCalendar();
         setAlarmText(note);
+        //isNowCalendar();
         db.getNoteDAO().update(note);
     }
-
+/*
     private  void isNowCalendar(){
         if (calendar.getTime().compareTo(Calendar.getInstance().getTime()) > 0) {
-            noteAlarm.setAlarm(calendar, (AlarmManager) getSystemService(Context.ALARM_SERVICE), noteId, title.getText().toString(), description.getText().toString(), imageUriString);
+            noteAlarm.setAlarm(calendar, noteId, title.getText().toString(), description.getText().toString(), imageUriString);
         }
-    }
-
-    private void setAlarmText(Note note){
-        if (noteAlarm.getAlarmTime() != null) alarmTime = noteAlarm.getAlarmTime();
-        if (alarmTime != null) note.setAlarmTime(alarmTime.getTime());
-    }
+    }*/
     /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
 
     /* ALARM ------------------------------------ Взаимодействия с будильником ------------------------------------------ */
+    private void setAlarmText(Note note){
+        if (noteAlarm.getAlarmTime() != null)
+            note.setAlarmTime(noteAlarm.getAlarmTime().getTime());
+        else
+            note.setAlarmTime(0);
+    }
     /* --------------------------------------- Конец взаимодействий с будильником --------------------------------------- */
 
     /* AUDIO ----------------------------------- Взаимодействия с аудиозаписями ----------------------------------------- */
+    public void addRecord(View view){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
+                recordButtonClick();
+            }
+        } else {
+            recordButtonClick();
+        }
+    }
+
     private void recordButtonClick(){
         isRecord = !isRecord;
         if (isRecord) {

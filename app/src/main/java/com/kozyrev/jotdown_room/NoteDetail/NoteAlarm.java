@@ -6,13 +6,19 @@ import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.support.design.widget.Snackbar;
+import android.view.View;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.AlarmReceiver;
+import com.kozyrev.jotdown_room.R;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -26,14 +32,16 @@ public class NoteAlarm {
     private Context activityContext;
 
     private TextView alarmTextView;
+    private View rootView;
 
     private Calendar calendar;
     private Date alarmTime;
+    private AlarmManager alarmService;
 
     private int alarmTextViewHeight;
     private boolean isAlarmUpdating = false;
 
-    public NoteAlarm(Context appContext, Context activityContext, Calendar calendar, Date alarmTime, TextView alarmTextView, int alarmTextViewHeight){
+    public NoteAlarm(Context appContext, Context activityContext, Calendar calendar, Date alarmTime, TextView alarmTextView, int alarmTextViewHeight, AlarmManager alarmService, View rootView){
         this.appContext = appContext;
         this.activityContext = activityContext;
 
@@ -42,6 +50,41 @@ public class NoteAlarm {
 
         this.alarmTextView = alarmTextView;
         this.alarmTextViewHeight = alarmTextViewHeight;
+
+        this.alarmService = alarmService;
+
+        this.rootView = rootView;
+    }
+
+    public void initAlarmListeners() {
+        alarmTextView.setOnClickListener(v -> {
+            updateAlarm();
+        });
+
+        alarmTextView.setOnLongClickListener(v -> {
+            alarmTextView.setText("");
+            setAlarmTextViewParams(0);
+
+            Snackbar snackbar = Snackbar
+                    .make(rootView, R.string.alarm_canceled_message, Snackbar.LENGTH_LONG);
+            snackbar.addCallback(new Snackbar.Callback() {
+                @Override
+                public void onDismissed(Snackbar snackbar, int event) {
+                    switch (event) {
+                        case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                            cancelAlarm(alarmTime.toString());
+                            break;
+                    }
+                }
+            });
+            snackbar.setAction("UNDO", view -> {
+                alarmTextView.setText(alarmTime.toString());
+                setAlarmTextViewParams(alarmTextViewHeight);
+            });
+            snackbar.setActionTextColor(Color.YELLOW);
+            snackbar.show();
+            return true;
+        });
     }
 
     private DatePickerDialog.OnDateSetListener onDateSetListener = (DatePicker datePicker, int year, int month, int dayOfMonth) -> {
@@ -57,9 +100,13 @@ public class NoteAlarm {
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        setAlarmTextViewParams(alarmTextViewHeight);
         alarmTime = calendar.getTime();
-        alarmTextView.setText(alarmTime.toString());
+        if (alarmTime.compareTo(new Date()) < 1) {
+            Toast.makeText(appContext, "Установите дату и время больше текущей", Toast.LENGTH_LONG).show();
+        } else {
+            setAlarmTextViewParams(alarmTextViewHeight);
+            alarmTextView.setText(alarmTime.toString());
+        }
     };
 
     public void openDatePickerDialog(Date updateDate){
@@ -81,16 +128,13 @@ public class NoteAlarm {
         timePickerDialog.show();
     }
 
-    public void setAlarm(Calendar targetCal, AlarmManager alarmSystemService, int noteId, String title, String description, String imageUriString){
+    public void setAlarm(Calendar targetCal, int noteId, String title, String description, String imageUriString){
         alarmTime = targetCal.getTime();
         String alarmText = alarmTime.toString();
-
-        if (isAlarmUpdating) cancelAlarm(alarmText, alarmSystemService);
-
-        newAlarmIntent(alarmText, targetCal, alarmSystemService, noteId, title, description, imageUriString);
+        newAlarmIntent(alarmText, targetCal, noteId, title, description, imageUriString);
     }
 
-    private void newAlarmIntent(String alarmText, Calendar targetCal, AlarmManager alarmSystemService, int noteId, String title, String description, String imageUriString){
+    private void newAlarmIntent(String alarmText, Calendar targetCal, int noteId, String title, String description, String imageUriString){
         Intent intent = new Intent(appContext, AlarmReceiver.class);
         intent.putExtra(AlarmReceiver.EXTRA_NOTE_ID, noteId);
         intent.putExtra(AlarmReceiver.EXTRA_TITLE, title);
@@ -99,24 +143,25 @@ public class NoteAlarm {
         intent.setAction(alarmText);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, RQS_TIME, intent, FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManager = alarmSystemService;
+        AlarmManager alarmManager = alarmService;
         alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
 
     public void updateAlarm(){
         isAlarmUpdating = true;
+        cancelAlarm(alarmTime.toString());
         openDatePickerDialog(alarmTime);
     }
 
-    public void cancelAlarm(String alarmText, AlarmManager alarmSystemService){
+    public void cancelAlarm(String alarmText){
         if (isAlarmUpdating) isAlarmUpdating = false;
-        else setAlarmTextViewParams(0);
 
         Intent intent = new Intent(appContext,  AlarmReceiver.class);
         intent.setAction(alarmText);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, RQS_TIME, intent, FLAG_CANCEL_CURRENT);
-        AlarmManager alarmManager = alarmSystemService;
+        AlarmManager alarmManager = alarmService;
         alarmManager.cancel(pendingIntent);
+        alarmTime = null;
     }
 
     public void setAlarmTextViewParams(int height){
@@ -127,5 +172,9 @@ public class NoteAlarm {
 
     public Date getAlarmTime(){
         return alarmTime;
+    }
+
+    public void setAlarmTime(Date alarmTime) {
+        this.alarmTime = alarmTime;
     }
 }
