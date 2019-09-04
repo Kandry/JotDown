@@ -130,9 +130,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
 
-
-
-
         noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
         noteAudioRecord.fetchRecordings();
 
@@ -142,12 +139,12 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         viewPager.setCurrentItem(0);
 
        // if (noteAudioRecord.getRecordingsCount() > 0) {
-            FragmentManager fragmentManager = getSupportFragmentManager();
+       /*     FragmentManager fragmentManager = getSupportFragmentManager();
             FragmentTransaction ft = fragmentManager.beginTransaction();
 
             RecordingFragment recordingFragment = new RecordingFragment();
             ft.add(R.id.fragmentContainer, recordingFragment, "recordingFragment");
-            ft.commit();
+            ft.commit();*/
       //  }
         //RecordingFragment recordingFragment = (RecordingFragment)
 
