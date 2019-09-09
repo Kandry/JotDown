@@ -28,7 +28,7 @@
         <android.support.v4.widget.NestedScrollView
             android:id="@+id/nextedScrollView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <FrameLayout
@@ -82,6 +82,7 @@
                             android:src="@android:drawable/ic_btn_speak_now" />
 
                         <ImageButton
+                            android:id="@+id/fileButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:contentDescription="@string/action_add_file"
@@ -130,36 +131,11 @@
                         tools:layout_editor_absoluteX="8dp"
                         tools:layout_editor_absoluteY="8dp" />
 
-
-<!--                    android:layout_gravity="bottom"-->
-
                     <com.kozyrev.jotdown_room.CustomViews.WrapContentHeightViewPager
                         android:id="@+id/viewpager"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content">
                     </com.kozyrev.jotdown_room.CustomViews.WrapContentHeightViewPager>
-
-<!--                    <android.support.v7.widget.RecyclerView
-
-                            android:layout_gravity="top"
-                            -->
-<!--                        android:id="@+id/recyclerViewRecordings"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="match_parent"/>-->
-
-<!--                    <LinearLayout-->
-<!--                        android:id="@+id/fragmentContainer"-->
-<!--                        android:layout_width="match_parent"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:orientation="vertical"/>-->
-
-<!--                    <TextView-->
-<!--                        android:id="@+id/textViewNoRecordings"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="No Recordings found."-->
-<!--                        android:visibility="gone"-->
-<!--                        android:textColor="@android:color/darker_gray"/>-->
 
                 </LinearLayout>
             </FrameLayout>

@@ -17,7 +17,6 @@ public class WrapContentHeightViewPager extends ViewPager {
 
     @Override
     public void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
 
         int mode = MeasureSpec.getMode(heightMeasureSpec);
 
@@ -35,6 +34,6 @@ public class WrapContentHeightViewPager extends ViewPager {
             heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
         }
 
-
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
 }

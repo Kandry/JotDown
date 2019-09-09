@@ -39,6 +39,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
+import com.kozyrev.jotdown_room.CustomViews.WrapContentHeightViewPager;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
 import com.kozyrev.jotdown_room.Entities.Recording;
@@ -74,20 +75,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private Toolbar toolbar;
     private NestedScrollView nestedScrollView;
     private ImageView imageView;
-    private TextInputEditText title;
-    private TextInputEditText description;
+    private TextInputEditText title, description;
     private TextView alarmTextView;
-    //private RecyclerView recyclerViewRecordings;
     private LinearLayout buttonsLayout;
-    private ImageButton cameraButton;
-    private ImageButton imageButton;
-    private ImageButton audioRecordingButton;
+    private ImageButton cameraButton, imageButton, audioRecordingButton, fileButton;
 
     private Calendar calendar = Calendar.getInstance();
     private ShareActionProvider shareActionProvider;
     private Chronometer chronometer;
 
-   // private NoteAudioRecord noteAudioRecord;
     private NoteAlarm noteAlarm;
     private NoteCamera noteCamera;
 
@@ -97,7 +93,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private boolean isRecord = false;
     Uri originalUri;
     private Date alarmTime = new Date();
-    //private ArrayList<Recording> recordingArraylist;
 
     private TabLayout tabLayout;
 
@@ -126,8 +121,12 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                                 : -1);
 
         noteAlarm = new NoteAlarm(getApplicationContext(), this, calendar, alarmTime, alarmTextView, (int) getResources().getDimension(R.dimen.searchEditText_height),
-                (AlarmManager) getSystemService(Context.ALARM_SERVICE), drawerLayout);
+                (AlarmManager) getSystemService(Context.ALARM_SERVICE), drawerLayout, noteId);
         noteAlarm.initAlarmListeners();
+
+        alarmTextView.setOnClickListener(v -> {
+            noteAlarm.updateAlarm(title.getText().toString(), description.getText().toString(), imageUriString);
+        });
 
         downloadData();
 
@@ -135,31 +134,13 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
 
-        //noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
-        //noteAudioRecord.fetchRecordings();
-
-        ViewPager viewPager = findViewById(R.id.viewpager);
+        WrapContentHeightViewPager wrapContentViewPager = findViewById(R.id.viewpager);
 
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
-        tabLayout.setupWithViewPager(viewPager);
+        tabLayout.setupWithViewPager(wrapContentViewPager);
 
         viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId);
-        viewPager.setAdapter(viewPagerAdapter);
-
-
-        //viewPager.setCurrentItem(0);
-
-       // if (noteAudioRecord.getRecordingsCount() > 0) {
-       /*     FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction ft = fragmentManager.beginTransaction();
-
-            RecordingFragment recordingFragment = new RecordingFragment();
-            ft.add(R.id.fragmentContainer, recordingFragment, "recordingFragment");
-            ft.commit();*/
-      //  }
-        //RecordingFragment recordingFragment = (RecordingFragment)
-
-
+        wrapContentViewPager.setAdapter(viewPagerAdapter);
     }
 
     @Override
@@ -192,16 +173,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         imageView = (ImageView) findViewById(R.id.imageNote);
         alarmTextView = (TextView) findViewById(R.id.textViewAlarmPrompt);
 
-        //recyclerViewRecordings = (RecyclerView) findViewById(R.id.recyclerViewRecordings);
-        //recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        //recyclerViewRecordings.setHasFixedSize(true);
-
         buttonsLayout = (LinearLayout) findViewById(R.id.buttonsLayout);
         cameraButton = (ImageButton) findViewById(R.id.cameraButton);
         imageButton = (ImageButton) findViewById(R.id.imageButton);
         audioRecordingButton = (ImageButton) findViewById(R.id.audioRecordingButton);
-
-       // recordingArraylist = new ArrayList<Recording>();
+        fileButton = findViewById(R.id.fileButton);
     }
 
     private void initDB(){
@@ -276,7 +252,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         switch (item.getItemId()){
             case R.id.action_create_notify:
                 alarmTextView.setText("");
-                noteAlarm.openDatePickerDialog(null);
+                noteAlarm.openDatePickerDialog(null, title.getText().toString(), description.getText().toString(), imageUriString);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -399,23 +375,18 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         note.setDescription(description.getText().toString());
         note.setImageResourceUri(imageUriString);
         setAlarmText(note);
-        //isNowCalendar();
         db.getNoteDAO().update(note);
     }
-/*
-    private  void isNowCalendar(){
-        if (calendar.getTime().compareTo(Calendar.getInstance().getTime()) > 0) {
-            noteAlarm.setAlarm(calendar, noteId, title.getText().toString(), description.getText().toString(), imageUriString);
-        }
-    }*/
     /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
 
     /* ALARM ------------------------------------ Взаимодействия с будильником ------------------------------------------ */
     private void setAlarmText(Note note){
-        if (noteAlarm.getAlarmTime() != null)
+        if (noteAlarm.getAlarmTime() != null) {
             note.setAlarmTime(noteAlarm.getAlarmTime().getTime());
-        else
+        }
+        else {
             note.setAlarmTime(0);
+        }
     }
     /* --------------------------------------- Конец взаимодействий с будильником --------------------------------------- */
 
@@ -443,6 +414,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private void prepareForRecording(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
+        cameraButton.setEnabled(false);
+        imageButton.setEnabled(false);
+        fileButton.setEnabled(false);
         int audioButtonColor = getResources().getColor(R.color.colorAccent);
         audioRecordingButton.setBackgroundColor(audioButtonColor);
         // Ограничить доступность остальных действий
@@ -450,6 +424,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private void prepareForStop(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
+        cameraButton.setEnabled(true);
+        imageButton.setEnabled(true);
+        fileButton.setEnabled(true);
         int audioButtonColor = getResources().getColor(R.color.selected_background);
         audioRecordingButton.setBackgroundColor(audioButtonColor);
         // Снять ограничение доступности остальных действий

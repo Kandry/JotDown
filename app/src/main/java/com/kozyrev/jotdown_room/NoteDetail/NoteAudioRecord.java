@@ -17,6 +17,7 @@ import com.kozyrev.jotdown_room.Entities.Recording;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchHelperListener {
 
@@ -69,7 +70,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             file.mkdirs();
         }
 
-        String audioRecordFileName = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + String.valueOf(System.currentTimeMillis() + ".mp3");
+        String audioRecordFileName = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + String.valueOf(new Date().toString() + ".mp3");
         mediaRecorder.setOutputFile(audioRecordFileName);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 

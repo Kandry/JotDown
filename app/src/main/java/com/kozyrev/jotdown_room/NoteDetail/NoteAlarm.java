@@ -39,11 +39,13 @@ public class NoteAlarm {
     private Calendar calendar;
     private Date alarmTime;
     private AlarmManager alarmService;
+    private int noteId;
+    private String title, description, imageUriString;
 
     private int alarmTextViewHeight;
     private boolean isAlarmUpdating = false;
 
-    public NoteAlarm(Context appContext, Context activityContext, Calendar calendar, Date alarmTime, TextView alarmTextView, int alarmTextViewHeight, AlarmManager alarmService, View rootView){
+    public NoteAlarm(Context appContext, Context activityContext, Calendar calendar, Date alarmTime, TextView alarmTextView, int alarmTextViewHeight, AlarmManager alarmService, View rootView, int noteId){
         this.appContext = appContext;
         this.activityContext = activityContext;
 
@@ -54,19 +56,15 @@ public class NoteAlarm {
         this.alarmTextViewHeight = alarmTextViewHeight;
 
         this.alarmService = alarmService;
-
         this.rootView = rootView;
+
+        this.noteId = noteId;
     }
 
     public void initAlarmListeners() {
-        alarmTextView.setOnClickListener(v -> {
-            updateAlarm();
-        });
-
         alarmTextView.setOnLongClickListener(v -> {
             alarmTextView.setText("");
             setAlarmTextViewParams(0);
-
             snackbar = Snackbar
                     .make(rootView, R.string.alarm_canceled_message, Snackbar.LENGTH_LONG);
             snackbar.addCallback(new Snackbar.Callback() {
@@ -110,11 +108,16 @@ public class NoteAlarm {
         } else {
             setAlarmTextViewParams(alarmTextViewHeight);
             alarmTextView.setText(alarmTime.toString());
+            setAlarm(calendar, noteId, title, description, imageUriString);
         }
     };
 
-    public void openDatePickerDialog(Date updateDate){
+    public void openDatePickerDialog(Date updateDate, String title, String description, String imageUriString){
         if (updateDate != null) calendar.setTime(updateDate);
+
+        this.title = title;
+        this.description = description;
+        this.imageUriString = imageUriString;
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(activityContext, onDateSetListener,
                 calendar.get(Calendar.YEAR),
@@ -151,10 +154,10 @@ public class NoteAlarm {
         alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
 
-    public void updateAlarm(){
+    public void updateAlarm(String title, String description, String imageUriString){
         isAlarmUpdating = true;
         cancelAlarm(alarmTime.toString());
-        openDatePickerDialog(alarmTime);
+        openDatePickerDialog(alarmTime, title, description, imageUriString);
     }
 
     public void cancelAlarm(String alarmText){
