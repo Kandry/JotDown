@@ -30,7 +30,7 @@ public class RecordingFragment extends Fragment {
     private int noteId;
     private boolean isRecord = false;
     private ArrayList<Recording> recordingArraylist;
-    private NoteAudioRecord noteAudioRecord;
+    public NoteAudioRecord noteAudioRecord;
 
     private LinearLayout buttonsLayout;
     private ImageButton recordButton;
@@ -102,6 +102,6 @@ public class RecordingFragment extends Fragment {
         int audioButtonColor = getResources().getColor(0);
         recordButton.setBackgroundColor(audioButtonColor);
         // Снять ограничение доступности остальных действий
-    }*/
-
+    }
+*/
 }

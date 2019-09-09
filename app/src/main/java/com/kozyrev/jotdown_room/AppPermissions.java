@@ -1,5 +1,6 @@
 package com.kozyrev.jotdown_room;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
@@ -14,22 +15,24 @@ public class AppPermissions {
     public static final int REQUEST_RECORD_AUDIO = 102;
 
     private Context context;
+    private Activity activity;
 
-    public AppPermissions(Context context){
+    public AppPermissions(Context context, Activity activity){
         this.context = context;
+        this.activity = activity;
     }
-/*
+
     @RequiresApi(api = Build.VERSION_CODES.M)
     public boolean getNeedPermissions(String[] permissions, int requestCode){
         for (String permission : permissions) {
             if (ContextCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED){
-                if (shouldShowRequestPermissionRationale(permission)){
+                if (activity.shouldShowRequestPermissionRationale(permission)){
                     Toast.makeText(context, "Для корректной работы приложения предоставьте необходимые разрешения", Toast.LENGTH_SHORT).show();
                 }
-                 requestPermissions(permissions, requestCode);
+                activity.requestPermissions(permissions, requestCode);
                 return false;
             }
         }
         return true;
-    }*/
+    }
 }

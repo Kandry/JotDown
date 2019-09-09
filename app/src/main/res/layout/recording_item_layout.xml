@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:layout_centerVertical="true"
-            android:layout_gravity="end"
+            android:layout_gravity="start"
             android:layout_marginEnd="8dp"
             android:text="Delete"
             android:textColor="#fff"
