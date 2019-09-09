@@ -76,7 +76,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private TextInputEditText title;
     private TextInputEditText description;
     private TextView alarmTextView;
-    private RecyclerView recyclerViewRecordings;
+    //private RecyclerView recyclerViewRecordings;
     private LinearLayout buttonsLayout;
     private ImageButton cameraButton;
     private ImageButton imageButton;
@@ -86,17 +86,17 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private ShareActionProvider shareActionProvider;
     private Chronometer chronometer;
 
-    private NoteAudioRecord noteAudioRecord;
+   // private NoteAudioRecord noteAudioRecord;
     private NoteAlarm noteAlarm;
     private NoteCamera noteCamera;
 
     private int noteId;
     private String imageUriString;
     private boolean notImageAdding = true;
-    private boolean isRecord = false;
+    //private boolean isRecord = false;
     Uri originalUri;
     private Date alarmTime = new Date();
-    private ArrayList<Recording> recordingArraylist;
+    //private ArrayList<Recording> recordingArraylist;
 
     /* ACTIVITY_LIFE_CYCLE --------------- Взаимодействия с жизненным циклом активности ---------------------------------- */
     @Override
@@ -130,10 +130,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
 
-        noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
-        noteAudioRecord.fetchRecordings();
+        //noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
+        //noteAudioRecord.fetchRecordings();
 
-        DetailNotePagerAdapter viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager());
+        DetailNotePagerAdapter viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId);
         ViewPager viewPager = findViewById(R.id.viewpager);
         viewPager.setAdapter(viewPagerAdapter);
         viewPager.setCurrentItem(0);
@@ -181,16 +181,16 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         imageView = (ImageView) findViewById(R.id.imageNote);
         alarmTextView = (TextView) findViewById(R.id.textViewAlarmPrompt);
 
-        recyclerViewRecordings = (RecyclerView) findViewById(R.id.recyclerViewRecordings);
-        recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-        recyclerViewRecordings.setHasFixedSize(true);
+        //recyclerViewRecordings = (RecyclerView) findViewById(R.id.recyclerViewRecordings);
+        //recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        //recyclerViewRecordings.setHasFixedSize(true);
 
         buttonsLayout = (LinearLayout) findViewById(R.id.buttonsLayout);
         cameraButton = (ImageButton) findViewById(R.id.cameraButton);
         imageButton = (ImageButton) findViewById(R.id.imageButton);
         audioRecordingButton = (ImageButton) findViewById(R.id.audioRecordingButton);
 
-        recordingArraylist = new ArrayList<Recording>();
+       // recordingArraylist = new ArrayList<Recording>();
     }
 
     private void initDB(){
@@ -409,6 +409,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* --------------------------------------- Конец взаимодействий с будильником --------------------------------------- */
 
     /* AUDIO ----------------------------------- Взаимодействия с аудиозаписями ----------------------------------------- */
+    /*
     public void addRecord(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
@@ -422,11 +423,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private void recordButtonClick(){
         isRecord = !isRecord;
         if (isRecord) {
-            prepareForRecording();
-            noteAudioRecord.startRecording();
+           // prepareForRecording();
+           // noteAudioRecord.startRecording();
         } else {
-            prepareForStop();
-            noteAudioRecord.stopRecording();
+           // prepareForStop();
+           // noteAudioRecord.stopRecording();
         }
     }
 
@@ -440,6 +441,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private void prepareForStop(){
         TransitionManager.beginDelayedTransition(buttonsLayout);
         // Снять ограничение доступности остальных действий
-    }
+    }*/
     /* -------------------------------------- Конец взаимодействий с аудиозаписями -------------------------------------- */
 }

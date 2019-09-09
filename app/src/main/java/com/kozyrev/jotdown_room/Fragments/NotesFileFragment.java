@@ -1,6 +1,7 @@
 package com.kozyrev.jotdown_room.Fragments;
 
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,14 +10,14 @@ import android.view.ViewGroup;
 
 import com.kozyrev.jotdown_room.R;
 
-/**
- * A simple {@link Fragment} subclass.
- */
+@SuppressLint("ValidFragment")
 public class NotesFileFragment extends Fragment {
 
+    private int noteId;
 
-    public NotesFileFragment() {
-        // Required empty public constructor
+    @SuppressLint("ValidFragment")
+    public NotesFileFragment(int noteId) {
+        this. noteId = noteId;
     }
 
 

@@ -46,61 +46,6 @@
                         android:layout_height="1dp"
                         android:scaleType="centerCrop"/>
 
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceLarge">
-                        <android.support.design.widget.TextInputEditText
-                            android:id="@+id/textTitle"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/note_title_hint" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.design.widget.TextInputLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-                        <android.support.design.widget.TextInputEditText
-                            android:id="@+id/textDescription"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:hint="@string/note_description_hit" />
-                    </android.support.design.widget.TextInputLayout>
-
-                    <android.support.v4.view.ViewPager
-                        android:id="@+id/viewpager"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"/>
-
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/recyclerViewRecordings"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"/>
-
-                    <LinearLayout
-                        android:id="@+id/fragmentContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"/>
-
-<!--                    <TextView-->
-<!--                        android:id="@+id/textViewNoRecordings"-->
-<!--                        android:layout_width="wrap_content"-->
-<!--                        android:layout_height="wrap_content"-->
-<!--                        android:text="No Recordings found."-->
-<!--                        android:visibility="gone"-->
-<!--                        android:textColor="@android:color/darker_gray"/>-->
-
-                    <TextView
-                        android:id="@+id/textViewAlarmPrompt"
-                        android:layout_width="match_parent"
-                        android:layout_height="0dp"
-                        android:background="@layout/rounded_border_textview"
-                        android:layout_margin="2dp"
-                        android:padding="2dp"
-                        android:layout_gravity="center"
-                        android:gravity="center"/>
-
                     <LinearLayout
                         android:id="@+id/buttonsLayout"
                         android:layout_width="match_parent"
@@ -132,7 +77,6 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:contentDescription="@string/action_add_record"
-                            android:onClick="addRecord"
                             android:longClickable="false"
                             android:src="@android:drawable/ic_btn_speak_now" />
 
@@ -143,6 +87,61 @@
                             android:src="@android:drawable/ic_menu_save"
                             android:layout_weight = "1"/>
                     </LinearLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="?android:attr/textAppearanceLarge">
+                        <android.support.design.widget.TextInputEditText
+                            android:id="@+id/textTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/note_title_hint" />
+                    </android.support.design.widget.TextInputLayout>
+
+                    <android.support.design.widget.TextInputLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <android.support.design.widget.TextInputEditText
+                            android:id="@+id/textDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="@string/note_description_hit" />
+                    </android.support.design.widget.TextInputLayout>
+
+                    <TextView
+                        android:id="@+id/textViewAlarmPrompt"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:background="@layout/rounded_border_textview"
+                        android:layout_margin="2dp"
+                        android:padding="2dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"/>
+
+                    <android.support.v4.view.ViewPager
+                        android:id="@+id/viewpager"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"/>
+
+<!--                    <android.support.v7.widget.RecyclerView-->
+<!--                        android:id="@+id/recyclerViewRecordings"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="match_parent"/>-->
+
+<!--                    <LinearLayout-->
+<!--                        android:id="@+id/fragmentContainer"-->
+<!--                        android:layout_width="match_parent"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:orientation="vertical"/>-->
+
+<!--                    <TextView-->
+<!--                        android:id="@+id/textViewNoRecordings"-->
+<!--                        android:layout_width="wrap_content"-->
+<!--                        android:layout_height="wrap_content"-->
+<!--                        android:text="No Recordings found."-->
+<!--                        android:visibility="gone"-->
+<!--                        android:textColor="@android:color/darker_gray"/>-->
 
                 </LinearLayout>
             </FrameLayout>
