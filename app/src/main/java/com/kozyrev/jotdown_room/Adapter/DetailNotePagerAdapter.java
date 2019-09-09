@@ -38,4 +38,16 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
                 return null;
         }
     }
+
+    @Override
+    public CharSequence getPageTitle(int position) {
+        switch (position){
+            case 0:
+                return "Records";
+            case 1:
+                return "Files";
+            default:
+                return "";
+        }
+    }
 }

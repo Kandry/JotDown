@@ -11,6 +11,7 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
 import android.support.v4.app.Fragment;
@@ -98,6 +99,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private Date alarmTime = new Date();
     //private ArrayList<Recording> recordingArraylist;
 
+    private TabLayout tabLayout;
+
     private DetailNotePagerAdapter viewPagerAdapter;
 
     /* ACTIVITY_LIFE_CYCLE --------------- Взаимодействия с жизненным циклом активности ---------------------------------- */
@@ -135,9 +138,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         //noteAudioRecord = new NoteAudioRecord(getApplicationContext(), drawerLayout, recyclerViewRecordings, recordingArraylist, noteId);
         //noteAudioRecord.fetchRecordings();
 
-        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId);
         ViewPager viewPager = findViewById(R.id.viewpager);
+
+        tabLayout = (TabLayout) findViewById(R.id.tablayout);
+        tabLayout.setupWithViewPager(viewPager);
+
+        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId);
         viewPager.setAdapter(viewPagerAdapter);
+
+
         //viewPager.setCurrentItem(0);
 
        // if (noteAudioRecord.getRecordingsCount() > 0) {
