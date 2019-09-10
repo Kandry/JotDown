@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class NotesFileFragment extends Fragment {
 
     private String fileUriString;
-    private ArrayList<NotesFile> filesArraylist;
     public NoteDetailFile noteDetailFile;
 
     @SuppressLint("ValidFragment")
@@ -38,7 +37,7 @@ public class NotesFileFragment extends Fragment {
         recyclerViewFiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerViewFiles.setHasFixedSize(false);
 
-        filesArraylist = new ArrayList<NotesFile>();
+        ArrayList<NotesFile> filesArraylist = new ArrayList<NotesFile>();
         noteDetailFile = new NoteDetailFile(getContext(), rootView, recyclerViewFiles, filesArraylist, fileUriString);
         noteDetailFile.fetchFiles();
 

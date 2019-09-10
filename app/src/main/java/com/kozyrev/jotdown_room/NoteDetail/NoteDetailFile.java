@@ -24,7 +24,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     private NotesFileAdapter fileAdapter;
     private ArrayList<NotesFile> fileArraylist;
 
-    private String fileUriString, fullPath, fileName;
+    private String fileUriString;
     private Uri fileUri;
 
     public NoteDetailFile(Context context, View rootView, RecyclerView recyclerViewFiles, ArrayList<NotesFile> fileArraylist, String fileUriString){
@@ -57,7 +57,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     }
 
     public void addFileUri(String fileUri){
-        fileUriString = fileUriString.concat(";" + fileUri); // join(";", fileUriString, fileUri);
+        fileUriString = fileUriString.concat(";" + fileUri);
     }
 
     public String getFileUriString() {
@@ -80,9 +80,9 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
                         case DISMISS_EVENT_TIMEOUT:
                         case DISMISS_EVENT_CONSECUTIVE:
                         case DISMISS_EVENT_MANUAL:
-                            fileUriString.replace(notesFile.getUri(), "");
-                            fileUriString.replace(";;", ";");
-                            fileUriString.replace("; ", "");
+                            fileUriString = fileUriString.replace(notesFile.getUri(), "");
+                            fileUriString = fileUriString.replace(";;", ";");
+                            fileUriString = fileUriString.replace("; ", "");
                             break;
                     }
                 }

@@ -86,6 +86,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:contentDescription="@string/action_add_file"
+                            android:onClick="addFile"
                             android:src="@android:drawable/ic_menu_save"
                             android:layout_weight = "1"/>
                     </LinearLayout>

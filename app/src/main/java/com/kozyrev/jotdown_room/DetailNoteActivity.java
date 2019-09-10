@@ -129,7 +129,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         WrapContentHeightViewPager wrapContentViewPager = findViewById(R.id.viewpager);
 
-        tabLayout = (TabLayout) findViewById(R.id.tablayout);
+        tabLayout = findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(wrapContentViewPager);
 
         viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString);
@@ -283,7 +283,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
             case REQUEST_PROVIDER:
                 if (resultCode == RESULT_OK){
-
+                    getFileFromProvider(data);
                 }
                 break;
         }
@@ -447,7 +447,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* FILES -------------------------------------- Взаимодействия с файлами -------------------------------------------- */
     public void addFile(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_READ_EXTERNAL_STORAGE)){
+            if (getNeedPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE)){
                 fileButtonClick();
             }
         } else {
