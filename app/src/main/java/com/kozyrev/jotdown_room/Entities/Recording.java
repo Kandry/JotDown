@@ -1,8 +1,8 @@
 package com.kozyrev.jotdown_room.Entities;
 
 public class Recording {
-    String Uri, fileName;
-    boolean isPlaying = false;
+    private String Uri, fileName;
+    private boolean isPlaying = false;
 
     public Recording(String uri, String fileName, boolean isPlaying) {
         Uri = uri;

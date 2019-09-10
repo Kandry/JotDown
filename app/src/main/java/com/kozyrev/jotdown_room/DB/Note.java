@@ -10,8 +10,8 @@ public class Note {
     private String name;
     private String description;
     private String imageResourceUri;
+    private String filesUri;
     private long alarmTime;
-
 
     public Note(String name, String description, String imageResourceUri){
         this.name = name;
@@ -48,6 +48,14 @@ public class Note {
     }
 
     public void setImageResourceUri(String imageResourceUri) { this.imageResourceUri = imageResourceUri; }
+
+    public String getFilesUri() {
+        return filesUri;
+    }
+
+    public void setFilesUri(String filesUri) {
+        this.filesUri = filesUri;
+    }
 
     public long getAlarmTime(){ return alarmTime; }
 

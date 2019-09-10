@@ -16,7 +16,11 @@ import com.kozyrev.jotdown_room.Entities.Recording;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 
 public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchHelperListener {
@@ -30,6 +34,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
     private ArrayList<Recording> recordingArraylist;
 
     private int noteId;
+    private String fullPath, fileName;
 
     public NoteAudioRecord(Context context, View rootView, RecyclerView recyclerViewRecordings, ArrayList<Recording> recordingArraylist, int noteId){
         this.context = context;
@@ -46,16 +51,23 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
         File root = getRoot();
         File[] files = getNoteRecordsDirectoryFiles(root);
         if (files != null){
+            Arrays.sort(files, new Comparator<File>() {
+                @Override
+                public int compare(File file1, File file2) {
+                    return file1.toString().compareTo(file2.toString());
+                }
+            });
 
             for (int i = 0; i < files.length; i++) {
                 addRecordToRecordingArrayList(i, root, files);
             }
         }
         setAdapterToRecyclerView();
+        //recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
     }
 
-    private void setAdapterToRecyclerView(){
-        recordingAdapter = new RecordingAdapter(context,recordingArraylist);
+    public void setAdapterToRecyclerView(){
+        recordingAdapter = new RecordingAdapter(context, recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
     }
 
@@ -69,9 +81,17 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
         if (!file.exists()){
             file.mkdirs();
         }
-
-        String audioRecordFileName = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + String.valueOf(new Date().toString() + ".mp3");
-        mediaRecorder.setOutputFile(audioRecordFileName);
+        Calendar calendar = Calendar.getInstance();
+        Date date = Calendar.getInstance().getTime();
+        fileName = String.valueOf(calendar.get(Calendar.YEAR) + "" +
+                calendar.get(Calendar.MONTH) + "" +
+                calendar.get(Calendar.DAY_OF_MONTH) + "_" +
+                calendar.get(Calendar.HOUR_OF_DAY) + "" +
+                calendar.get(Calendar.MINUTE) + "" +
+                calendar.get(Calendar.SECOND) +
+                ".mp3");
+        fullPath = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + fileName;
+        mediaRecorder.setOutputFile(fullPath);
         mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
 
         if (recordingAdapter != null) recordingAdapter.notifyStopPlaying();
@@ -89,10 +109,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             mediaRecorder.stop();
             mediaRecorder.release();
 
-            File root = getRoot();
-            File[] files = getNoteRecordsDirectoryFiles(root);
-            addRecordToRecordingArrayList(files.length - 1, root, files);
-
+            addRecordToRecordingArrayList(fullPath, fileName);
             recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
             Toast.makeText(context, "Record added", Toast.LENGTH_SHORT).show();
 
@@ -117,6 +134,11 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
         String fileName = files[i].getName();
         String recordingUri = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId + "/" + fileName;
         Recording recording = new Recording(recordingUri, fileName, false);
+        recordingArraylist.add(recording);
+    }
+
+    private void addRecordToRecordingArrayList(String fullPath, String fileName){
+        Recording recording = new Recording(fullPath, fileName, false);
         recordingArraylist.add(recording);
     }
 
