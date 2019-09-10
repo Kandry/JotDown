@@ -14,9 +14,6 @@ import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -24,8 +21,6 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -42,14 +37,10 @@ import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.CustomViews.WrapContentHeightViewPager;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
-import com.kozyrev.jotdown_room.Entities.Recording;
-import com.kozyrev.jotdown_room.Fragments.RecordingFragment;
-import com.kozyrev.jotdown_room.NoteDetail.NoteAudioRecord;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAlarm;
 import com.kozyrev.jotdown_room.NoteDetail.NoteCamera;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -63,8 +54,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private static final int REQUEST_READ_EXTERNAL_STORAGE = 101;
     private static final int REQUEST_RECORD_AUDIO = 102;
 
-    static final int REQUEST_GALLERY = 200;
+    private static final int REQUEST_GALLERY = 200;
     private static final int START_CAMERA_APP = 201;
+    private static final int REQUEST_PROVIDER = 202;
 
     public static final String EXTRA_NOTE_ID = "uid";
 
@@ -88,10 +80,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private NoteCamera noteCamera;
 
     private int noteId;
-    private String imageUriString;
+    private String imageUriString, fileUriString = "";
     private boolean notImageAdding = true;
     private boolean isRecord = false;
     Uri originalUri;
+    Uri fileUri;
     private Date alarmTime = new Date();
 
     private TabLayout tabLayout;
@@ -139,7 +132,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         tabLayout = (TabLayout) findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(wrapContentViewPager);
 
-        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId);
+        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString);
         wrapContentViewPager.setAdapter(viewPagerAdapter);
     }
 
@@ -218,6 +211,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                         alarmTextView.setText(alarmTime.toString());
                     }
                 }
+                if (!note.getFilesUri().equals("")){
+                    fileUriString = note.getFilesUri();
+                }
             }
 
             @Override
@@ -284,17 +280,31 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                     imageUriString = noteCamera.getPhotoFromCamera((int) getResources().getDimension(R.dimen.imageview_height));
                 }
                 break;
+
+            case REQUEST_PROVIDER:
+                if (resultCode == RESULT_OK){
+
+                }
+                break;
         }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         switch (requestCode){
-            case (REQUEST_WRITE_EXTERNAL_STORAGE):
+            case (REQUEST_READ_EXTERNAL_STORAGE):
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     callCameraApp();
                 } else {
                     Toast.makeText(getApplicationContext(), "Нет разрешения на запись, фото не сохранено", Toast.LENGTH_LONG).show();
+                    finishAffinity();
+                }
+                break;
+            case (REQUEST_WRITE_EXTERNAL_STORAGE):
+                if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                    fileButtonClick();
+                } else {
+                    Toast.makeText(getApplicationContext(), "Нет разрешения на чтение, файл не прикреплен", Toast.LENGTH_LONG).show();
                     finishAffinity();
                 }
                 break;
@@ -374,6 +384,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         note.setName(title.getText().toString());
         note.setDescription(description.getText().toString());
         note.setImageResourceUri(imageUriString);
+        note.setFilesUri(viewPagerAdapter.getNotesFileFragment().noteDetailFile.getFileUriString());
         setAlarmText(note);
         db.getNoteDAO().update(note);
     }
@@ -432,4 +443,30 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         // Снять ограничение доступности остальных действий
     }
     /* -------------------------------------- Конец взаимодействий с аудиозаписями -------------------------------------- */
+
+    /* FILES -------------------------------------- Взаимодействия с файлами -------------------------------------------- */
+    public void addFile(View view){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_READ_EXTERNAL_STORAGE)){
+                fileButtonClick();
+            }
+        } else {
+            fileButtonClick();
+        }
+    }
+
+    private void fileButtonClick(){
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        startActivityForResult(Intent.createChooser(intent, "Select file"), REQUEST_PROVIDER);
+    }
+
+    private void getFileFromProvider(Intent data){
+        fileUri = data.getData();
+        int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        getContentResolver().takePersistableUriPermission(fileUri, takeFlags);
+
+        viewPagerAdapter.getNotesFileFragment().noteDetailFile.addFileUri(fileUri.toString());
+    }
+    /* ----------------------------------------- Конец взаимодействий с файлами ----------------------------------------- */
 }

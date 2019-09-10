@@ -66,7 +66,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
         //recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
     }
 
-    public void setAdapterToRecyclerView(){
+    private void setAdapterToRecyclerView(){
         recordingAdapter = new RecordingAdapter(context, recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
     }
@@ -155,7 +155,6 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             snackbar.addCallback(new Snackbar.Callback() {
                 @Override
                 public void onDismissed(Snackbar snackbar, int event) {
-                    Log.d("test1", "audio del");
                     switch (event) {
                         case DISMISS_EVENT_TIMEOUT:
                         case DISMISS_EVENT_CONSECUTIVE:

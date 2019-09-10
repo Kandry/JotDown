@@ -9,17 +9,21 @@ import com.kozyrev.jotdown_room.Fragments.RecordingFragment;
 
 public class DetailNotePagerAdapter extends FragmentPagerAdapter {
 
-    private int noteId;
     private RecordingFragment recordingFragment;
+    private NotesFileFragment notesFileFragment;
 
-    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId){
+    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString){
         super((fragmentManager));
-        this.noteId = noteId;
         recordingFragment = new RecordingFragment(noteId);
+        notesFileFragment = new NotesFileFragment(fileUriString);
     }
 
     public RecordingFragment getRecordingFragment(){
         return recordingFragment;
+    }
+
+    public NotesFileFragment getNotesFileFragment() {
+        return notesFileFragment;
     }
 
     @Override
@@ -33,7 +37,7 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
             case 0:
                 return recordingFragment;//new RecordingFragment(noteId);
             case 1:
-                return new NotesFileFragment(noteId);
+                return notesFileFragment;
             default:
                 return null;
         }
