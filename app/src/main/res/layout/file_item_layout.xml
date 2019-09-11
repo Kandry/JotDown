@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
                 android:text="File 001"
-                android:textColor="@android:color/holo_green_light"
+                android:textColor="@android:color/holo_blue_dark"
                 android:textStyle="bold"/>
 
             <View

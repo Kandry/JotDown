@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -459,6 +460,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     }
 
     private void fileButtonClick(){
+        viewPagerAdapter.getNotesFileFragment().noteDetailFile.setPackageManager(getPackageManager());
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("*/*");
         startActivityForResult(Intent.createChooser(intent, "Select file"), REQUEST_PROVIDER);
@@ -471,6 +473,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         String fileUriToString = fileUri.toString();
         String fileName = "";
+       // String filePath = "";
 
         if (fileUriToString.startsWith("file:")){
             fileName = (new File(fileUriToString)).getName();
@@ -478,6 +481,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             Cursor cursor = getContentResolver().query(fileUri, null, null, null, null);
             try {
                 if (cursor != null && cursor.moveToFirst()) {
+                   // int idx = cursor.getColumnIndex(MediaStore.Files.FileColumns.DATA);
+                   // filePath = cursor.getString(idx);
                     fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
                 }
             } finally {

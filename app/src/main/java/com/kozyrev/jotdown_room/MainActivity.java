@@ -345,7 +345,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onDismissed(Snackbar snackbar, int event) {
                 switch(event) {
-                    case Snackbar.Callback.DISMISS_EVENT_TIMEOUT:
+                    case DISMISS_EVENT_TIMEOUT:
+                    case DISMISS_EVENT_CONSECUTIVE:
+                    case DISMISS_EVENT_MANUAL:
                         for (int i = 0; i < removedNotes.size(); i++){
                             deleteNote(removedNotes.keyAt(i));
                         }
