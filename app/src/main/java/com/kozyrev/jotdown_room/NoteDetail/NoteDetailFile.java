@@ -3,7 +3,6 @@ package com.kozyrev.jotdown_room.NoteDetail;
 
 import android.content.Context;
 import android.graphics.Color;
-import android.net.Uri;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -12,7 +11,6 @@ import android.view.View;
 import com.kozyrev.jotdown_room.Adapter.FileItemTouchHelper;
 import com.kozyrev.jotdown_room.Adapter.NotesFileAdapter;
 import com.kozyrev.jotdown_room.Entities.NotesFile;
-
 import java.util.ArrayList;
 
 public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelperListener {
@@ -25,7 +23,6 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     private ArrayList<NotesFile> fileArraylist;
 
     private String fileUriString;
-    private Uri fileUri;
 
     public NoteDetailFile(Context context, View rootView, RecyclerView recyclerViewFiles, ArrayList<NotesFile> fileArraylist, String fileUriString){
         this.context = context;
@@ -39,9 +36,14 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     }
 
     public void fetchFiles(){
-        String[] filesUri = fileUriString.split(";");
-        for(String fileUri : filesUri){
-            addFileToFileArrayList(fileUri);
+        if (!fileUriString.equals("")) {
+            String[] filesUriAndName = fileUriString.split(";");
+            for (String fileUriAndName : filesUriAndName) {
+                String[] fileUriName = fileUriAndName.split("|");
+                String fileUri = fileUriName[0];
+                String fileName = fileUriName[1];
+                if (!fileUri.equals("")) addFileToFileArrayList(fileUri, fileName);
+            }
         }
         setAdapterToRecyclerView();
     }
@@ -51,13 +53,16 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
         recyclerViewFiles.setAdapter(fileAdapter);
     }
 
-    private void addFileToFileArrayList(String fileUri){
+    private void addFileToFileArrayList(String fileUri, String fileName){
         NotesFile notesFile = new NotesFile(fileUri);
+        notesFile.setFileName(fileName);
         fileArraylist.add(notesFile);
     }
 
-    public void addFileUri(String fileUri){
-        fileUriString = fileUriString.concat(";" + fileUri);
+    public void addFileUri(String fileUri, String fileName){
+        fileUriString = fileUriString.concat(";" + fileUri + "|" + fileName);
+        addFileToFileArrayList(fileUri, fileName);
+        fileAdapter.notifyUpdateFilesList(fileArraylist);
     }
 
     public String getFileUriString() {
@@ -69,7 +74,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
         if (viewHolder instanceof NotesFileAdapter.ViewHolder){
             NotesFile notesFile = fileArraylist.get(position);
             fileArraylist.remove(position);
-            fileAdapter.notifyUpdateRecordsList(fileArraylist);
+            fileAdapter.notifyUpdateFilesList(fileArraylist);
 
             Snackbar snackbar = Snackbar
                     .make(rootView, "File deleted from note", Snackbar.LENGTH_LONG);
@@ -80,7 +85,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
                         case DISMISS_EVENT_TIMEOUT:
                         case DISMISS_EVENT_CONSECUTIVE:
                         case DISMISS_EVENT_MANUAL:
-                            fileUriString = fileUriString.replace(notesFile.getUri(), "");
+                            fileUriString = fileUriString.replace(notesFile.getUri() + "|" + notesFile.getFileName(), "");
                             fileUriString = fileUriString.replace(";;", ";");
                             fileUriString = fileUriString.replace("; ", "");
                             break;
@@ -89,7 +94,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
             });
             snackbar.setAction("UNDO", v -> {
                 fileArraylist.add(position, notesFile);
-                fileAdapter.notifyUpdateRecordsList(fileArraylist);
+                fileAdapter.notifyUpdateFilesList(fileArraylist);
             });
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();

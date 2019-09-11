@@ -37,7 +37,7 @@ public class NotesFileFragment extends Fragment {
         recyclerViewFiles.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerViewFiles.setHasFixedSize(false);
 
-        ArrayList<NotesFile> filesArraylist = new ArrayList<NotesFile>();
+        ArrayList<NotesFile> filesArraylist = new ArrayList<>();
         noteDetailFile = new NoteDetailFile(getContext(), rootView, recyclerViewFiles, filesArraylist, fileUriString);
         noteDetailFile.fetchFiles();
 

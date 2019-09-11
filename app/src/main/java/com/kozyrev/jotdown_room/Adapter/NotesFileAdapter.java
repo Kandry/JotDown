@@ -14,7 +14,6 @@ import android.widget.TextView;
 import com.kozyrev.jotdown_room.Entities.NotesFile;
 import com.kozyrev.jotdown_room.R;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.ViewHolder>{
@@ -31,7 +30,7 @@ public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.View
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.recording_item_layout, parent, false);
+        View view = LayoutInflater.from(context).inflate(R.layout.file_item_layout, parent, false);
         ViewHolder viewHolder = new ViewHolder(view);
 
         view.setOnClickListener(v -> {
@@ -55,7 +54,7 @@ public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.View
         return fileArrayList == null ? 0 : fileArrayList.size();
     }
 
-    public void notifyUpdateRecordsList(ArrayList<NotesFile> fileArrayList){
+    public void notifyUpdateFilesList(ArrayList<NotesFile> fileArrayList){
         this.fileArrayList = fileArrayList;
         this.notifyDataSetChanged();
     }
@@ -77,9 +76,9 @@ public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.View
         SeekBar seekBar;
         TextView textViewName;
 
-        RecordingAdapter.ViewHolder holder;
+        NotesFileAdapter.ViewHolder holder;
 
-        private String recordingUri;
+        private String fileUri;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -87,8 +86,8 @@ public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.View
             backgroundLayout = itemView.findViewById(R.id.view_background_file);
             foregroundLayout = itemView.findViewById(R.id.view_foreground_file);
 
-            imageViewFile = itemView.findViewById(R.id.imageViewPlay);
-            textViewName = itemView.findViewById(R.id.textViewRecordingName);
+            imageViewFile = itemView.findViewById(R.id.imageViewFile);
+            textViewName = itemView.findViewById(R.id.textViewFileName);
         }
     }
 }

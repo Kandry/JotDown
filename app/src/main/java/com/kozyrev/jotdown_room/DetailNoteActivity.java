@@ -6,8 +6,10 @@ import android.arch.persistence.room.Room;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
@@ -41,6 +43,7 @@ import com.kozyrev.jotdown_room.NoteDetail.NoteAlarm;
 import com.kozyrev.jotdown_room.NoteDetail.NoteCamera;
 import com.squareup.picasso.Picasso;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -292,7 +295,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         switch (requestCode){
-            case (REQUEST_READ_EXTERNAL_STORAGE):
+            case (REQUEST_WRITE_EXTERNAL_STORAGE):
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     callCameraApp();
                 } else {
@@ -300,7 +303,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                     finishAffinity();
                 }
                 break;
-            case (REQUEST_WRITE_EXTERNAL_STORAGE):
+            case (REQUEST_READ_EXTERNAL_STORAGE):
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     fileButtonClick();
                 } else {
@@ -466,7 +469,23 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
         getContentResolver().takePersistableUriPermission(fileUri, takeFlags);
 
-        viewPagerAdapter.getNotesFileFragment().noteDetailFile.addFileUri(fileUri.toString());
+        String fileUriToString = fileUri.toString();
+        String fileName = "";
+
+        if (fileUriToString.startsWith("file:")){
+            fileName = (new File(fileUriToString)).getName();
+        } else {
+            Cursor cursor = getContentResolver().query(fileUri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    fileName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+
+        viewPagerAdapter.getNotesFileFragment().noteDetailFile.addFileUri(fileUriToString, fileName);
     }
     /* ----------------------------------------- Конец взаимодействий с файлами ----------------------------------------- */
 }
