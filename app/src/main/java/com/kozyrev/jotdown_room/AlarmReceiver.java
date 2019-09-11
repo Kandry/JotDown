@@ -28,10 +28,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static final int NOTIFICATION_ID = 5453;
     public static final String CHANNEL_ID = "1234";
 
-    public static final String EXTRA_NOTE_ID = "noteId";
-    public static final String EXTRA_TITLE = "title";
-    public static final String EXTRA_CONTENT_TEXT = "contentText";
-    public static final String EXTRA_URI = "uri";
+    public static final String EXTRA_NOTE_ID = "noteId", EXTRA_TITLE = "title", EXTRA_CONTENT_TEXT = "contentText", EXTRA_URI = "uri";
 
 
     @Override

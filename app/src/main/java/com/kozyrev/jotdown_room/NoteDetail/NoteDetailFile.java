@@ -31,15 +31,13 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     private NotesFileAdapter.FilesListener filesListener;
 
     private String fileUriString;
-    private PackageManager packageManager;
 
-    public NoteDetailFile(Context context, View rootView, RecyclerView recyclerViewFiles, ArrayList<NotesFile> fileArraylist, String fileUriString, PackageManager packageManager){
+    public NoteDetailFile(Context context, View rootView, RecyclerView recyclerViewFiles, ArrayList<NotesFile> fileArraylist, String fileUriString){
         this.context = context;
         this.rootView = rootView;
         this.recyclerViewFiles = recyclerViewFiles;
         this.fileArraylist = fileArraylist;
         this.fileUriString = fileUriString;
-        this.packageManager = packageManager;
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new FileItemTouchHelper(0, ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewFiles);
@@ -61,7 +59,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
         setListener();
     }
 
-    public void setListener(){
+    private void setListener(){
         filesListener = new NotesFileAdapter.FilesListener() {
             @Override
             public void onClick(int position) {

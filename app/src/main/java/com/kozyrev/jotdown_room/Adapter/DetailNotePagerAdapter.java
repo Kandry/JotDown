@@ -13,10 +13,10 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
     private RecordingFragment recordingFragment;
     private NotesFileFragment notesFileFragment;
 
-    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString, PackageManager packageManager){
+    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString){
         super((fragmentManager));
         recordingFragment = new RecordingFragment(noteId);
-        notesFileFragment = new NotesFileFragment(fileUriString, packageManager);
+        notesFileFragment = new NotesFileFragment(fileUriString);
     }
 
     public RecordingFragment getRecordingFragment(){

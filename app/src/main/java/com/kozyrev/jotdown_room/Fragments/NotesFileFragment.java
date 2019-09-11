@@ -2,7 +2,6 @@ package com.kozyrev.jotdown_room.Fragments;
 
 
 import android.annotation.SuppressLint;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -11,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.kozyrev.jotdown_room.DetailNoteActivity;
 import com.kozyrev.jotdown_room.Entities.NotesFile;
 import com.kozyrev.jotdown_room.NoteDetail.NoteDetailFile;
 import com.kozyrev.jotdown_room.R;
@@ -22,13 +20,11 @@ import java.util.ArrayList;
 public class NotesFileFragment extends Fragment {
 
     private String fileUriString;
-    private PackageManager packageManager;
     public NoteDetailFile noteDetailFile;
 
     @SuppressLint("ValidFragment")
-    public NotesFileFragment(String fileUriString, PackageManager packageManager) {
+    public NotesFileFragment(String fileUriString) {
         this.fileUriString = fileUriString;
-        this.packageManager = packageManager;
     }
 
     @Override
@@ -41,7 +37,7 @@ public class NotesFileFragment extends Fragment {
         recyclerViewFiles.setHasFixedSize(false);
 
         ArrayList<NotesFile> filesArraylist = new ArrayList<>();
-        noteDetailFile = new NoteDetailFile(getContext(), rootView, recyclerViewFiles, filesArraylist, fileUriString, packageManager);
+        noteDetailFile = new NoteDetailFile(getContext(), rootView, recyclerViewFiles, filesArraylist, fileUriString);
         noteDetailFile.fetchFiles();
 
         return rootView;

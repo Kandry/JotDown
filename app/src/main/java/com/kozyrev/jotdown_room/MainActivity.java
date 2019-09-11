@@ -2,14 +2,12 @@ package com.kozyrev.jotdown_room;
 
 import android.app.SearchManager;
 import android.arch.persistence.room.Room;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -22,9 +20,7 @@ import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
 import android.text.TextUtils;
-import android.text.TextWatcher;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.Menu;
@@ -32,9 +28,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.support.v7.widget.SearchView;
-import android.widget.Toast;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.OnDragInitiatedListener;
@@ -66,7 +60,6 @@ import io.reactivex.subscribers.DisposableSubscriber;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener{
 
     RecyclerView notesRecycler;
-    EditText searchEditText;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
     NavigationView navigationView;
@@ -76,15 +69,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ActionMode actionMode;
     Menu menu;
 
-    MenuItem itemSearch;
-    MenuItem itemChooseListView;
-    MenuItem itemSelectCount;
-    MenuItem itemClear;
-    MenuItem itemDelete;
+    MenuItem itemSearch, itemChooseListView, itemSelectCount, itemClear, itemDelete;
 
     private List<Note> notesList = null;
-    boolean isCard = true;
-    boolean isSearch = false;
+    boolean isCard = true, isSearch = false;
     List<RowType> items = new ArrayList<>();
     ArrayMap<Integer, Note> removedNotes = new ArrayMap<>();
 
@@ -104,18 +92,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void initViews(){
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        notesRecycler = (RecyclerView) findViewById(R.id.notes_recycler);
+        notesRecycler = findViewById(R.id.notes_recycler);
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, 1);
         notesRecycler.setLayoutManager(layoutManager);
         notesRecycler.setItemAnimator(new DefaultItemAnimator());
@@ -138,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemClear = menu.findItem(R.id.action_clear);
         itemDelete = menu.findItem(R.id.action_delete);
 
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        //SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) itemSearch.getActionView();
         searchView.setOnQueryTextListener(this);
 

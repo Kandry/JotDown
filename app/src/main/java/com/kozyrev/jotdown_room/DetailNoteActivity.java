@@ -76,6 +76,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private TextView alarmTextView;
     private LinearLayout buttonsLayout;
     private ImageButton cameraButton, imageButton, audioRecordingButton, fileButton;
+    private WrapContentHeightViewPager wrapContentViewPager;
+    private TabLayout tabLayout;
 
     private Calendar calendar = Calendar.getInstance();
     private ShareActionProvider shareActionProvider;
@@ -88,8 +90,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     private String imageUriString, fileUriString = "";
     private boolean notImageAdding = true;
     private boolean isRecord = false;
-    Uri originalUri;
-    Uri fileUri;
+    Uri originalUri, fileUri;
     private Date alarmTime = new Date();
 
     private DetailNotePagerAdapter viewPagerAdapter;
@@ -116,26 +117,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                                 ? (int) getIntent().getExtras().get(EXTRA_NOTE_ID)
                                 : -1);
 
-        noteAlarm = new NoteAlarm(getApplicationContext(), this, calendar, alarmTime, alarmTextView, (int) getResources().getDimension(R.dimen.searchEditText_height),
-                (AlarmManager) getSystemService(Context.ALARM_SERVICE), drawerLayout, noteId);
-        noteAlarm.initAlarmListeners();
-
-        alarmTextView.setOnClickListener(v -> {
-            noteAlarm.updateAlarm(title.getText().toString(), description.getText().toString(), imageUriString);
-        });
-
         downloadData();
 
         if (noteId < 0) noteId = (int) addNote();
 
-        noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
+        initAlarm();
+        initCamera();
 
-        WrapContentHeightViewPager wrapContentViewPager = findViewById(R.id.viewpager);
-
-        TabLayout tabLayout = findViewById(R.id.tablayout);
-        tabLayout.setupWithViewPager(wrapContentViewPager);
-
-        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString, getPackageManager());
+        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString);
         wrapContentViewPager.setAdapter(viewPagerAdapter);
     }
 
@@ -148,7 +137,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         }
     }
     /* ------------------------------- Конец взаимодействий с жизненным циклом активности ------------------------------- */
-
     private void initViews(){
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -174,6 +162,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         imageButton = findViewById(R.id.imageButton);
         audioRecordingButton = findViewById(R.id.audioRecordingButton);
         fileButton = findViewById(R.id.fileButton);
+
+        wrapContentViewPager = findViewById(R.id.viewpager);
+        tabLayout = findViewById(R.id.tablayout);
+        tabLayout.setupWithViewPager(wrapContentViewPager);
     }
 
     private void initDB(){
@@ -327,6 +319,23 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     }
     /* ------------------------------------ Конец взаимодействий с активностью выбора ----------------------------------- */
 
+    /* DATABASE ------------------------------------- Взаимодействия с БД ----------------------------------------------- */
+    private long addNote(){
+        Note note = new Note(title.getText().toString(), description.getText().toString(), imageUriString);
+        return db.getNoteDAO().insert(note);
+    }
+
+    private void updateNote(){
+        Note note = db.getNoteDAO().getNoteById(noteId);
+        note.setName(title.getText().toString());
+        note.setDescription(description.getText().toString());
+        note.setImageResourceUri(imageUriString);
+        note.setFilesUri(viewPagerAdapter.getNotesFileFragment().noteDetailFile.getFileUriString());
+        setAlarmText(note);
+        db.getNoteDAO().update(note);
+    }
+    /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
+
     /* SHARE --------------------------------- Взаимодействия с отправкой заметки --------------------------------------- */
     private void setShareActionIntent(String text){
         Intent intent = new Intent(Intent.ACTION_SEND);
@@ -360,6 +369,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* -------------------------------------- Конец взаимодействий с изображениями -------------------------------------- */
 
     /* PHOTO -------------------------------------- Взаимодействия с камерой -------------------------------------------- */
+    private void initCamera(){
+        noteCamera = new NoteCamera(getApplicationContext(), this, imageView);
+    }
+
     public void addPhoto(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
             if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE)){
@@ -376,24 +389,17 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     }
     /* ----------------------------------------- Конец взаимодействий с камерой ----------------------------------------- */
 
-    /* DATABASE ------------------------------------- Взаимодействия с БД ----------------------------------------------- */
-    private long addNote(){
-        Note note = new Note(title.getText().toString(), description.getText().toString(), imageUriString);
-        return db.getNoteDAO().insert(note);
-    }
-
-    private void updateNote(){
-        Note note = db.getNoteDAO().getNoteById(noteId);
-        note.setName(title.getText().toString());
-        note.setDescription(description.getText().toString());
-        note.setImageResourceUri(imageUriString);
-        note.setFilesUri(viewPagerAdapter.getNotesFileFragment().noteDetailFile.getFileUriString());
-        setAlarmText(note);
-        db.getNoteDAO().update(note);
-    }
-    /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
-
     /* ALARM ------------------------------------ Взаимодействия с будильником ------------------------------------------ */
+    private void initAlarm(){
+        noteAlarm = new NoteAlarm(getApplicationContext(), this, calendar, alarmTime, alarmTextView, (int) getResources().getDimension(R.dimen.searchEditText_height),
+                (AlarmManager) getSystemService(Context.ALARM_SERVICE), drawerLayout, noteId);
+        noteAlarm.initAlarmListeners();
+
+        alarmTextView.setOnClickListener(v -> {
+            noteAlarm.updateAlarm(title.getText().toString(), description.getText().toString(), imageUriString);
+        });
+    }
+
     private void setAlarmText(Note note){
         if (noteAlarm.getAlarmTime() != null) {
             note.setAlarmTime(noteAlarm.getAlarmTime().getTime());

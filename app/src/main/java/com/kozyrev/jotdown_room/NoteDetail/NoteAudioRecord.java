@@ -6,7 +6,6 @@ import android.media.MediaRecorder;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -16,7 +15,6 @@ import com.kozyrev.jotdown_room.Entities.Recording;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;

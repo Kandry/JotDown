@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
@@ -19,7 +18,6 @@ import android.widget.Toast;
 import com.kozyrev.jotdown_room.AlarmReceiver;
 import com.kozyrev.jotdown_room.R;
 
-import java.io.File;
 import java.util.Calendar;
 import java.util.Date;
 

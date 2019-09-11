@@ -8,7 +8,6 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.widget.ImageView;
 
-import com.kozyrev.jotdown_room.R;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
