@@ -1,5 +1,6 @@
 package com.kozyrev.jotdown_room.Adapter;
 
+import android.content.pm.PackageManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -12,10 +13,10 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
     private RecordingFragment recordingFragment;
     private NotesFileFragment notesFileFragment;
 
-    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString){
+    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString, PackageManager packageManager){
         super((fragmentManager));
         recordingFragment = new RecordingFragment(noteId);
-        notesFileFragment = new NotesFileFragment(fileUriString);
+        notesFileFragment = new NotesFileFragment(fileUriString, packageManager);
     }
 
     public RecordingFragment getRecordingFragment(){
@@ -35,7 +36,7 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
     public Fragment getItem(int position){
         switch (position){
             case 0:
-                return recordingFragment;//new RecordingFragment(noteId);
+                return recordingFragment;
             case 1:
                 return notesFileFragment;
             default:
