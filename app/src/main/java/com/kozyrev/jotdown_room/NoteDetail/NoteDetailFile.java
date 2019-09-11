@@ -4,7 +4,6 @@ package com.kozyrev.jotdown_room.NoteDetail;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
@@ -12,15 +11,14 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 
 import com.kozyrev.jotdown_room.Adapter.FileItemTouchHelper;
 import com.kozyrev.jotdown_room.Adapter.NotesFileAdapter;
-import com.kozyrev.jotdown_room.BuildConfig;
 import com.kozyrev.jotdown_room.Entities.NotesFile;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelperListener {
 
@@ -69,30 +67,18 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
             public void onClick(int position) {
                 NotesFile notesFile = fileArraylist.get(position);
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                String extension = notesFile.getExtension();
-                switch (extension){
-                    case ("jpg"):
-                        extension = "jpeg";
-                        break;
-                    case ("doc"):
-                    case ("docs"):
-                        extension = "msword";
-                        break;
-                }
-
-                String intentType = "application/" + extension;
-                intent.setType(intentType);
-                List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
                 File file = new File(notesFile.getFullPath());
 
-                if (list.size() > 0 && file.isFile()){
-                    Uri uri = FileProvider.getUriForFile(context, "com.kozyrev.jotdown_room.fileprovider", file);
-                    intent.setDataAndType(uri, intentType);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                    Intent chooser = Intent.createChooser(intent, "Open file");
-                    context.startActivity(chooser);
-                }
+                MimeTypeMap map = MimeTypeMap.getSingleton();
+                String ext = MimeTypeMap.getFileExtensionFromUrl(file.getName());
+                String type = map.getMimeTypeFromExtension(ext);
+                if (type == null) type = "*/*";
+
+                Uri uri = FileProvider.getUriForFile(context, "com.kozyrev.jotdown_room.fileprovider", file);
+                intent.setDataAndType(uri, type);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                context.startActivity(intent);
             }
         };
 

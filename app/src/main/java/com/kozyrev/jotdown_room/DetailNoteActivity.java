@@ -14,7 +14,6 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
@@ -22,7 +21,6 @@ import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -48,8 +46,6 @@ import com.kozyrev.jotdown_room.NoteDetail.NoteAlarm;
 import com.kozyrev.jotdown_room.NoteDetail.NoteCamera;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.net.URISyntaxException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -96,8 +92,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     Uri fileUri;
     private Date alarmTime = new Date();
 
-    private TabLayout tabLayout;
-
     private DetailNotePagerAdapter viewPagerAdapter;
 
     /* ACTIVITY_LIFE_CYCLE --------------- Взаимодействия с жизненным циклом активности ---------------------------------- */
@@ -138,17 +132,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         WrapContentHeightViewPager wrapContentViewPager = findViewById(R.id.viewpager);
 
-        tabLayout = findViewById(R.id.tablayout);
+        TabLayout tabLayout = findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(wrapContentViewPager);
 
         viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString, getPackageManager());
         wrapContentViewPager.setAdapter(viewPagerAdapter);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        //viewPagerAdapter.getNotesFileFragment().noteDetailFile.setPackageManager(getPackageManager());
     }
 
     @Override
@@ -162,29 +150,29 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* ------------------------------- Конец взаимодействий с жизненным циклом активности ------------------------------- */
 
     private void initViews(){
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawerLayout = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
 
-        nestedScrollView = (NestedScrollView) findViewById(R.id.nextedScrollView);
+        nestedScrollView = findViewById(R.id.nextedScrollView);
         nestedScrollView.setFillViewport(true);
 
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
-        title = (TextInputEditText) findViewById(R.id.textTitle);
-        description = (TextInputEditText) findViewById(R.id.textDescription);
-        imageView = (ImageView) findViewById(R.id.imageNote);
-        alarmTextView = (TextView) findViewById(R.id.textViewAlarmPrompt);
+        title = findViewById(R.id.textTitle);
+        description = findViewById(R.id.textDescription);
+        imageView = findViewById(R.id.imageNote);
+        alarmTextView = findViewById(R.id.textViewAlarmPrompt);
 
-        buttonsLayout = (LinearLayout) findViewById(R.id.buttonsLayout);
-        cameraButton = (ImageButton) findViewById(R.id.cameraButton);
-        imageButton = (ImageButton) findViewById(R.id.imageButton);
-        audioRecordingButton = (ImageButton) findViewById(R.id.audioRecordingButton);
+        buttonsLayout = findViewById(R.id.buttonsLayout);
+        cameraButton = findViewById(R.id.cameraButton);
+        imageButton = findViewById(R.id.imageButton);
+        audioRecordingButton = findViewById(R.id.audioRecordingButton);
         fileButton = findViewById(R.id.fileButton);
     }
 
@@ -488,8 +476,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         viewPagerAdapter.getNotesFileFragment().noteDetailFile.addFileUri(fileUriToString, filePath);
     }
 
+
     @TargetApi(Build.VERSION_CODES.KITKAT)
-    public static String getPath(final Context context, final Uri uri) {
+    private static String getPath(final Context context, final Uri uri) {
 
         final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
 
@@ -556,7 +545,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         return null;
     }
 
-    public static String getDataColumn(Context context, Uri uri, String selection,
+    private static String getDataColumn(Context context, Uri uri, String selection,
                                        String[] selectionArgs) {
 
         Cursor cursor = null;
@@ -583,7 +572,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
      * @param uri The Uri to check.
      * @return Whether the Uri authority is ExternalStorageProvider.
      */
-    public static boolean isExternalStorageDocument(Uri uri) {
+    private static boolean isExternalStorageDocument(Uri uri) {
         return "com.android.externalstorage.documents".equals(uri.getAuthority());
     }
 
@@ -591,7 +580,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
      * @param uri The Uri to check.
      * @return Whether the Uri authority is DownloadsProvider.
      */
-    public static boolean isDownloadsDocument(Uri uri) {
+    private static boolean isDownloadsDocument(Uri uri) {
         return "com.android.providers.downloads.documents".equals(uri.getAuthority());
     }
 
@@ -599,7 +588,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
      * @param uri The Uri to check.
      * @return Whether the Uri authority is MediaProvider.
      */
-    public static boolean isMediaDocument(Uri uri) {
+    private static boolean isMediaDocument(Uri uri) {
         return "com.android.providers.media.documents".equals(uri.getAuthority());
     }
 
@@ -607,7 +596,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
      * @param uri The Uri to check.
      * @return Whether the Uri authority is Google Photos.
      */
-    public static boolean isGooglePhotosUri(Uri uri) {
+    private static boolean isGooglePhotosUri(Uri uri) {
         return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
     /* ----------------------------------------- Конец взаимодействий с файлами ----------------------------------------- */
