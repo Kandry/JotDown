@@ -28,6 +28,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -117,15 +118,17 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                                 ? (int) getIntent().getExtras().get(EXTRA_NOTE_ID)
                                 : -1);
 
+        initAlarm();
         downloadData();
 
         if (noteId < 0) noteId = (int) addNote();
 
-        initAlarm();
         initCamera();
 
         viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString);
         wrapContentViewPager.setAdapter(viewPagerAdapter);
+
+
     }
 
     @Override

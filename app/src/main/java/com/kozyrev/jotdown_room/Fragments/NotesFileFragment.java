@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.Entities.NotesFile;
 import com.kozyrev.jotdown_room.NoteDetail.NoteDetailFile;
 import com.kozyrev.jotdown_room.R;
@@ -21,10 +22,12 @@ public class NotesFileFragment extends Fragment {
 
     private String fileUriString;
     public NoteDetailFile noteDetailFile;
+    private DetailNotePagerAdapter detailNotePagerAdapter;
 
     @SuppressLint("ValidFragment")
-    public NotesFileFragment(String fileUriString) {
+    public NotesFileFragment(String fileUriString, DetailNotePagerAdapter detailNotePagerAdapter) {
         this.fileUriString = fileUriString;
+        this.detailNotePagerAdapter = detailNotePagerAdapter;
     }
 
     @Override
@@ -37,7 +40,7 @@ public class NotesFileFragment extends Fragment {
         recyclerViewFiles.setHasFixedSize(false);
 
         ArrayList<NotesFile> filesArraylist = new ArrayList<>();
-        noteDetailFile = new NoteDetailFile(getContext(), rootView, recyclerViewFiles, filesArraylist, fileUriString);
+        noteDetailFile = new NoteDetailFile(getContext(), rootView, recyclerViewFiles, filesArraylist, fileUriString, detailNotePagerAdapter);
         noteDetailFile.fetchFiles();
 
         return rootView;

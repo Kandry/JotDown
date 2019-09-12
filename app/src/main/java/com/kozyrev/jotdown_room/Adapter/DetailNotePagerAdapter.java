@@ -1,6 +1,5 @@
 package com.kozyrev.jotdown_room.Adapter;
 
-import android.content.pm.PackageManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
@@ -12,11 +11,22 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
 
     private RecordingFragment recordingFragment;
     private NotesFileFragment notesFileFragment;
+    private int recordsCount = 1, filesCount = 1;
+
+    public void updatePagerAdapterRecordsCount(int recordsCount){
+        this.recordsCount = recordsCount;
+        this.notifyDataSetChanged();
+    }
+
+    public void updatePagerAdapterFilesCount(int filesCount){
+        this.filesCount = filesCount;
+        this.notifyDataSetChanged();
+    }
 
     public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString){
         super((fragmentManager));
-        recordingFragment = new RecordingFragment(noteId);
-        notesFileFragment = new NotesFileFragment(fileUriString);
+        recordingFragment = new RecordingFragment(noteId, this);
+        notesFileFragment = new NotesFileFragment(fileUriString, this);
     }
 
     public RecordingFragment getRecordingFragment(){
@@ -29,14 +39,20 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount(){
-        return 2;
+        if (recordsCount > 0 || filesCount > 0) {
+            if (recordsCount > 0 && filesCount > 0) return 2;
+            else return 1;
+        } else {
+            return 0;
+        }
     }
 
     @Override
     public Fragment getItem(int position){
         switch (position){
             case 0:
-                return recordingFragment;
+                if (recordsCount > 0) return recordingFragment;
+                else return notesFileFragment;
             case 1:
                 return notesFileFragment;
             default:
@@ -48,7 +64,8 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position){
             case 0:
-                return "Records";
+                if (recordsCount > 0) return "Records";
+                else return "Files";
             case 1:
                 return "Files";
             default:

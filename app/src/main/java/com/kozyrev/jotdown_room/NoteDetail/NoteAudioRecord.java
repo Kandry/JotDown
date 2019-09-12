@@ -9,6 +9,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.widget.Toast;
 
+import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.Adapter.RecordItemTouchHelper;
 import com.kozyrev.jotdown_room.Adapter.RecordingAdapter;
 import com.kozyrev.jotdown_room.Entities.Recording;
@@ -26,6 +27,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
     private Context context;
     private RecyclerView recyclerViewRecordings;
     private View rootView;
+    private DetailNotePagerAdapter detailNotePagerAdapter;
 
     private MediaRecorder mediaRecorder;
     private RecordingAdapter recordingAdapter;
@@ -34,12 +36,13 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
     private int noteId;
     private String fullPath, fileName;
 
-    public NoteAudioRecord(Context context, View rootView, RecyclerView recyclerViewRecordings, ArrayList<Recording> recordingArraylist, int noteId){
+    public NoteAudioRecord(Context context, View rootView, RecyclerView recyclerViewRecordings, ArrayList<Recording> recordingArraylist, int noteId, DetailNotePagerAdapter detailNotePagerAdapter){
         this.context = context;
         this.rootView = rootView;
         this.recyclerViewRecordings = recyclerViewRecordings;
         this.recordingArraylist = recordingArraylist;
         this.noteId = noteId;
+        this.detailNotePagerAdapter = detailNotePagerAdapter;
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new RecordItemTouchHelper(0, ItemTouchHelper.RIGHT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewRecordings);
@@ -67,6 +70,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
     private void setAdapterToRecyclerView(){
         recordingAdapter = new RecordingAdapter(context, recordingArraylist);
         recyclerViewRecordings.setAdapter(recordingAdapter);
+        if (recordingArraylist.size() == 0) detailNotePagerAdapter.updatePagerAdapterRecordsCount(recordingArraylist.size());
     }
 
     public void startRecording(){
@@ -138,6 +142,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
     private void addRecordToRecordingArrayList(String fullPath, String fileName){
         Recording recording = new Recording(fullPath, fileName, false);
         recordingArraylist.add(recording);
+        if (recordingArraylist.size() == 1) detailNotePagerAdapter.updatePagerAdapterRecordsCount(recordingArraylist.size());
     }
 
     @Override
@@ -147,6 +152,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
 
             recordingArraylist.remove(position);
             recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+            if (recordingArraylist.size() < 1) detailNotePagerAdapter.updatePagerAdapterRecordsCount(recordingArraylist.size());
 
             Snackbar snackbar = Snackbar
                     .make(rootView, "Record deleted", Snackbar.LENGTH_LONG);
@@ -169,6 +175,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             snackbar.setAction("UNDO", v -> {
                 recordingArraylist.add(position, recording);
                 recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
+                if (recordingArraylist.size() == 1) detailNotePagerAdapter.updatePagerAdapterRecordsCount(recordingArraylist.size());
             });
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();

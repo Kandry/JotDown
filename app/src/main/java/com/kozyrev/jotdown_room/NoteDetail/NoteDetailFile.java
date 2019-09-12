@@ -1,9 +1,7 @@
 package com.kozyrev.jotdown_room.NoteDetail;
 
-
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.support.design.widget.Snackbar;
@@ -13,6 +11,7 @@ import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 
+import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.Adapter.FileItemTouchHelper;
 import com.kozyrev.jotdown_room.Adapter.NotesFileAdapter;
 import com.kozyrev.jotdown_room.Entities.NotesFile;
@@ -25,6 +24,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     private Context context;
     private RecyclerView recyclerViewFiles;
     private View rootView;
+    private DetailNotePagerAdapter detailNotePagerAdapter;
 
     private NotesFileAdapter fileAdapter;
     private ArrayList<NotesFile> fileArraylist;
@@ -32,12 +32,13 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
 
     private String fileUriString;
 
-    public NoteDetailFile(Context context, View rootView, RecyclerView recyclerViewFiles, ArrayList<NotesFile> fileArraylist, String fileUriString){
+    public NoteDetailFile(Context context, View rootView, RecyclerView recyclerViewFiles, ArrayList<NotesFile> fileArraylist, String fileUriString, DetailNotePagerAdapter detailNotePagerAdapter){
         this.context = context;
         this.rootView = rootView;
         this.recyclerViewFiles = recyclerViewFiles;
         this.fileArraylist = fileArraylist;
         this.fileUriString = fileUriString;
+        this.detailNotePagerAdapter = detailNotePagerAdapter;
 
         ItemTouchHelper.SimpleCallback itemTouchHelperCallback = new FileItemTouchHelper(0, ItemTouchHelper.LEFT, this);
         new ItemTouchHelper(itemTouchHelperCallback).attachToRecyclerView(recyclerViewFiles);
@@ -86,6 +87,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     private void setAdapterToRecyclerView(){
         fileAdapter = new NotesFileAdapter(context, fileArraylist);
         recyclerViewFiles.setAdapter(fileAdapter);
+        if (fileArraylist.size() == 0) detailNotePagerAdapter.updatePagerAdapterFilesCount(fileArraylist.size());
     }
 
     private void addFileToFileArrayList(String fileUri, String filePath){
@@ -100,6 +102,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
         fileUriString = fileUriString.concat(";" + fileUri + "<" + filePath);
         addFileToFileArrayList(fileUri, filePath);
         fileAdapter.notifyUpdateFilesList(fileArraylist);
+        if (fileArraylist.size() == 1) detailNotePagerAdapter.updatePagerAdapterFilesCount(fileArraylist.size());
     }
 
     private String getFileName(String filePath){
@@ -131,6 +134,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
         if (viewHolder instanceof NotesFileAdapter.ViewHolder){
             NotesFile notesFile = fileArraylist.get(position);
             fileArraylist.remove(position);
+            if (fileArraylist.size() < 1) detailNotePagerAdapter.updatePagerAdapterFilesCount(fileArraylist.size());
             fileAdapter.notifyUpdateFilesList(fileArraylist);
 
             Snackbar snackbar = Snackbar
@@ -151,6 +155,7 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
             });
             snackbar.setAction("UNDO", v -> {
                 fileArraylist.add(position, notesFile);
+                if (fileArraylist.size() == 1) detailNotePagerAdapter.updatePagerAdapterFilesCount(fileArraylist.size());
                 fileAdapter.notifyUpdateFilesList(fileArraylist);
             });
             snackbar.setActionTextColor(Color.YELLOW);

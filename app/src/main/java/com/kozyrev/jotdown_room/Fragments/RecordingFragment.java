@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.kozyrev.jotdown_room.Adapter.DetailNotePagerAdapter;
 import com.kozyrev.jotdown_room.Entities.Recording;
 import com.kozyrev.jotdown_room.NoteDetail.NoteAudioRecord;
 import com.kozyrev.jotdown_room.R;
@@ -26,10 +27,12 @@ public class RecordingFragment extends Fragment {
     private boolean isRecord = false;
     private ArrayList<Recording> recordingArraylist;
     public NoteAudioRecord noteAudioRecord;
+    private DetailNotePagerAdapter detailNotePagerAdapter;
 
     @SuppressLint("ValidFragment")
-    public RecordingFragment(int noteId) {
-        this. noteId = noteId;
+    public RecordingFragment(int noteId, DetailNotePagerAdapter detailNotePagerAdapter) {
+        this.noteId = noteId;
+        this.detailNotePagerAdapter = detailNotePagerAdapter;
     }
 
     @Override
@@ -42,7 +45,7 @@ public class RecordingFragment extends Fragment {
         recyclerViewRecordings.setHasFixedSize(false);
 
         recordingArraylist = new ArrayList<Recording>();
-        noteAudioRecord = new NoteAudioRecord(getContext(), rootView, recyclerViewRecordings, recordingArraylist, noteId);
+        noteAudioRecord = new NoteAudioRecord(getContext(), rootView, recyclerViewRecordings, recordingArraylist, noteId, detailNotePagerAdapter);
         //noteAudioRecord.setAdapterToRecyclerView();
         noteAudioRecord.fetchRecordings();
 
