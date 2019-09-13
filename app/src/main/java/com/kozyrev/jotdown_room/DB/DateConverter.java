@@ -1,4 +1,4 @@
-package com.kozyrev.jotdown_room.DB;
+/*package com.kozyrev.jotdown_room.DB;
 
 import android.arch.persistence.room.TypeConverter;
 
@@ -13,4 +13,4 @@ public class DateConverter {
             return date.getTime();
         }
     }
-}
+}*/

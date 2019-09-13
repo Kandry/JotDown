@@ -64,7 +64,6 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             }
         }
         setAdapterToRecyclerView();
-        //recordingAdapter.notifyUpdateRecordsList(recordingArraylist);
     }
 
     private void setAdapterToRecyclerView(){

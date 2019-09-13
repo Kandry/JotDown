@@ -16,7 +16,7 @@ import java.util.List;
 
 public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> {
 
-    private Listener listener;
+    //private Listener listener;
     private List<RowType> dataSet;
     private SelectionTracker selectionTracker;
 
@@ -41,13 +41,13 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
     public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
         AppViewHolder viewHolder = ViewHolderFactory.create(parent, viewType, dataSet);
         CardView cardView = (CardView) viewHolder.itemView;
-
+/*
         cardView.setOnClickListener((v) -> {
             int adapterPosition = viewHolder.getAdapterPosition();
             if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
                 listener.onClick(adapterPosition);
             }
-        });
+        });*/
 
         /*cardView.setOnLongClickListener(v -> {
             int adapterPosition = viewHolder.getAdapterPosition();
@@ -75,16 +75,16 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
         this.notifyDataSetChanged();
     }
 
-    public void setListener(Listener listener){
+    /*public void setListener(Listener listener){
         this.listener = listener;
-    }
+    }*/
 
     public void setSelectionTracker(SelectionTracker selectionTracker){
         this.selectionTracker = selectionTracker;
     }
-
+/*
     public interface Listener{
         void onClick(int position);
        // void onLongClick(int position);
-    }
+    }*/
 }

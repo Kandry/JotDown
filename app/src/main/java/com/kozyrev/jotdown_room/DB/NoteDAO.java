@@ -45,7 +45,4 @@ public interface NoteDAO {
 
     @Query("SELECT COUNT(*) FROM NOTES")
     int getNotesCount();
-
-    @Query("SELECT filesUri FROM NOTES WHERE uid = :noteId")
-    String getFilesUriById(int noteId);
 }

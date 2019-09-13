@@ -73,12 +73,11 @@ public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.View
         public RelativeLayout foregroundLayout;
 
         ImageView imageViewFile;
-        SeekBar seekBar;
         TextView textViewName;
 
-        NotesFileAdapter.ViewHolder holder;
+       // NotesFileAdapter.ViewHolder holder;
 
-        private String fileUri;
+        //private String fileUri;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

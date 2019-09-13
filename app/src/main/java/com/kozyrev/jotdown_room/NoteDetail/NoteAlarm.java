@@ -41,7 +41,7 @@ public class NoteAlarm {
     private String title, description, imageUriString;
 
     private int alarmTextViewHeight;
-    private boolean isAlarmUpdating = false;
+    //private boolean isAlarmUpdating = false;
 
     public NoteAlarm(Context appContext, Context activityContext, Calendar calendar, Date alarmTime, TextView alarmTextView, int alarmTextViewHeight, AlarmManager alarmService, View rootView, int noteId){
         this.appContext = appContext;
@@ -153,14 +153,13 @@ public class NoteAlarm {
     }
 
     public void updateAlarm(String title, String description, String imageUriString){
-        isAlarmUpdating = true;
+        //isAlarmUpdating = true;
         cancelAlarm(alarmTime.toString());
         openDatePickerDialog(alarmTime, title, description, imageUriString);
     }
 
     public void cancelAlarm(String alarmText){
-        if (isAlarmUpdating) isAlarmUpdating = false;
-
+        //if (isAlarmUpdating) isAlarmUpdating = false;
         Intent intent = new Intent(appContext,  AlarmReceiver.class);
         intent.setAction(alarmText);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, RQS_TIME, intent, FLAG_CANCEL_CURRENT);

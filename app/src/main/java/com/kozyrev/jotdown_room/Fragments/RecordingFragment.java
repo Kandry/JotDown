@@ -46,7 +46,6 @@ public class RecordingFragment extends Fragment {
 
         recordingArraylist = new ArrayList<Recording>();
         noteAudioRecord = new NoteAudioRecord(getContext(), rootView, recyclerViewRecordings, recordingArraylist, noteId, detailNotePagerAdapter);
-        //noteAudioRecord.setAdapterToRecyclerView();
         noteAudioRecord.fetchRecordings();
 
         return rootView;

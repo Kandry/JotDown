@@ -32,11 +32,11 @@ public class NotesFile {
         this.fileName = fileName;
     }
 
-    public String getExtension() {
+    /*public String getExtension() {
         return extension;
     }
 
     public void setExtension(String extension) {
         this.extension = extension;
-    }
+    }*/
 }
