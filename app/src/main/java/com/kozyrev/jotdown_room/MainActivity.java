@@ -1,6 +1,5 @@
 package com.kozyrev.jotdown_room;
 
-import android.app.SearchManager;
 import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.graphics.Color;
@@ -8,6 +7,9 @@ import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
@@ -27,8 +29,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.EditText;
 import android.support.v7.widget.SearchView;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.OnDragInitiatedListener;
@@ -41,6 +45,7 @@ import com.kozyrev.jotdown_room.Adapter.NoteItemKeyProvider;
 import com.kozyrev.jotdown_room.Adapter.NoteItemLookup;
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
+import com.kozyrev.jotdown_room.Fragments.NoteLightFragment;
 import com.kozyrev.jotdown_room.RowTypes.ImageRowType;
 import com.kozyrev.jotdown_room.RowTypes.RowType;
 import com.kozyrev.jotdown_room.RowTypes.TextRowType;
@@ -68,6 +73,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     SelectionTracker selectionTracker;
     ActionMode actionMode;
     Menu menu;
+
+    FrameLayout noteLightFragmentContainer;
 
     MenuItem itemSearch, itemChooseListView, itemSelectCount, itemClear, itemDelete;
 
@@ -108,6 +115,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler.setLayoutManager(layoutManager);
         notesRecycler.setItemAnimator(new DefaultItemAnimator());
         notesRecycler.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
+
+        noteLightFragmentContainer = findViewById(R.id.noteLightFragmentContainer);
     }
 
     private void initDB(){
@@ -255,9 +264,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .withOnItemActivatedListener(new OnItemActivatedListener<Long>() {
                     @Override
                     public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> item, @NonNull MotionEvent motionEvent) {
-                        Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
-                        intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
-                        startActivity(intent);
+                        noteLightFragmentContainer.setVisibility(View.VISIBLE);
+
+                        FragmentManager fragmentManager = getSupportFragmentManager();
+                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        NoteLightFragment noteLightFragment = new NoteLightFragment(notesList.get(item.getPosition()).getUid());
+                        fragmentTransaction.add(R.id.noteLightFragmentContainer, noteLightFragment);
+                        fragmentTransaction.commit();
+
+                        //Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
+                        //intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
+                        //startActivity(intent);
                         return true;
                     }
                 })
