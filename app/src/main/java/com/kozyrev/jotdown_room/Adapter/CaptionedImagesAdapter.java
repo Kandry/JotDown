@@ -69,6 +69,10 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
         item.onBindViewHolder(holder);
     }
 
+    public void updateNoteItem(int position){
+        this.notifyItemChanged(position);
+    }
+
     public void updateNotesList(List<RowType> dataSet){
         positions.clear();
         this.dataSet = dataSet;

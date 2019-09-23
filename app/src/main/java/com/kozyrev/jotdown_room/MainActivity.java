@@ -32,6 +32,7 @@ import android.view.View;
 import android.support.v7.widget.SearchView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
@@ -74,12 +75,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ActionMode actionMode;
     Menu menu;
 
-    FrameLayout noteLightFragmentContainer;
+    FrameLayout notesFrameLayout;
+    LinearLayout noteLightFragmentContainer;
+    NoteLightFragment noteLightFragment;
 
     MenuItem itemSearch, itemChooseListView, itemSelectCount, itemClear, itemDelete;
 
     private List<Note> notesList = null;
-    boolean isCard = true, isSearch = false;
+    boolean isCard = true, isSearch = false, isSelected = false;
     List<RowType> items = new ArrayList<>();
     ArrayMap<Integer, Note> removedNotes = new ArrayMap<>();
 
@@ -116,6 +119,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler.setItemAnimator(new DefaultItemAnimator());
         notesRecycler.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
 
+        notesFrameLayout = findViewById(R.id.notesFrameLayout);
+       /* notesFrameLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (isSelected){
+                    FragmentManager fragmentManager = getSupportFragmentManager();
+                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                    fragmentTransaction.remove(noteLightFragment);
+                    fragmentTransaction.commit();
+                }
+            }
+        });*/
         noteLightFragmentContainer = findViewById(R.id.noteLightFragmentContainer);
     }
 
@@ -197,12 +212,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onResume() {
         super.onResume();
+
+        if (isSelected && (noteLightFragment != null)){
+            /* ВЫНЕСТИ В МЕТОД */
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.remove(noteLightFragment);
+            noteLightFragmentContainer.setVisibility(View.GONE);
+            noteLightFragment = null;
+            fragmentTransaction.commit();
+        }
+
         if (searchView != null) {
             if (TextUtils.isEmpty(searchView.getQuery().toString())) {
                 deleteSearch();
             } else {
                 createSearch(searchView.getQuery().toString());
             }
+        }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isSelected && (noteLightFragment != null)){
+            /* ВЫНЕСТИ В МЕТОД */
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+            fragmentTransaction.remove(noteLightFragment);
+            noteLightFragmentContainer.setVisibility(View.GONE);
+            noteLightFragment = null;
+            fragmentTransaction.commit();
+        } else {
+            super.onBackPressed();
         }
     }
 
@@ -219,12 +260,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new DisposableSubscriber<List<Note>>() {
                     @Override
                     public void onNext(List<Note> listNote) {
+                        Log.d("DEBUGBAG", "TEST123");
                         if (!isSearch) {
                             notesList = listNote;
                             if(notesRecycler.getAdapter() != null){
                                 updateAdapter();
+                                Log.d("DEBUGBAG", "TEST1234");
                             } else {
                                 createAdapter();
+                                Log.d("DEBUGBAG", "TEST1235");
                             }
                         }
                     }
@@ -264,17 +308,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .withOnItemActivatedListener(new OnItemActivatedListener<Long>() {
                     @Override
                     public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> item, @NonNull MotionEvent motionEvent) {
-                        noteLightFragmentContainer.setVisibility(View.VISIBLE);
-
                         FragmentManager fragmentManager = getSupportFragmentManager();
                         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                        NoteLightFragment noteLightFragment = new NoteLightFragment(notesList.get(item.getPosition()).getUid());
-                        fragmentTransaction.add(R.id.noteLightFragmentContainer, noteLightFragment);
-                        fragmentTransaction.commit();
+                        Note note = notesList.get(item.getPosition());
 
-                        //Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
-                        //intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
-                        //startActivity(intent);
+                        int pastNoteId = -1;
+
+                        if (isSelected && (noteLightFragment != null)){
+                            fragmentTransaction.remove(noteLightFragment);
+                            noteLightFragmentContainer.setVisibility(View.GONE);
+                            pastNoteId = noteLightFragment.getNoteId();
+                            noteLightFragment = null;
+                        }
+
+                        if (pastNoteId != note.getUid()) {
+                            noteLightFragment = new NoteLightFragment(note.getUid(), note.getName(), note.getDescription(), item.getPosition());
+                            noteLightFragmentContainer.setVisibility(View.VISIBLE);
+                            fragmentTransaction.add(R.id.noteLightFragmentContainer, noteLightFragment);
+                        }
+                        fragmentTransaction.commit();
+/*
+                        Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
+                        intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
+                        startActivity(intent);*/
+
+                        isSelected = true;
                         return true;
                     }
                 })
@@ -402,9 +460,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemDelete.setVisible(isSelect);
     }
 
-    private void updateAdapter(){
-        setAdapterDataSet();
+    public void updateItem(int position, Note note){
+        notesList.set(position, note);
+        updateAdapter();
+    }
 
+    public void updateAdapter(){
+        setAdapterDataSet();
         CaptionedImagesAdapter adapter = (CaptionedImagesAdapter) notesRecycler.getAdapter();
         adapter.updateNotesList(items);
     }

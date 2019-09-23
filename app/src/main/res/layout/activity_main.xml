@@ -25,51 +25,19 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <FrameLayout
-            android:id="@+id/noteLightFragmentContainer"
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_gravity="center"
-            android:layout_margin="16dp"
-            android:visibility="gone"/>
-
         <LinearLayout
             android:id="@+id/noteFragmentLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-<!--            <fragment-->
-<!--                android:id="@+id/noteLightFragment"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_gravity="center"-->
-<!--                android:layout_marginLeft="@dimen/margin_top"-->
-<!--                android:layout_marginRight="@dimen/margin_top"-->
-<!--                android:layout_marginTop="@dimen/searchEditText_height"-->
-<!--                android:layout_marginBottom="@dimen/searchEditText_height"-->
-<!--                tools:layout="@layout/fragment_note_light"/>-->
+            <android.support.v4.widget.NestedScrollView
+                android:id="@+id/nestedScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-<!--            <LinearLayout-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                android:orientation="vertical"-->
-<!--                app:layout_behavior="@string/appbar_scrolling_view_behavior">-->
-
-<!--                <FrameLayout-->
-<!--                    android:id="@+id/noteLightFragmentContainer"-->
-<!--                    android:orientation="vertical"-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:layout_gravity="center"-->
-<!--                    android:layout_marginLeft="@dimen/margin_top"-->
-<!--                    android:layout_marginRight="@dimen/margin_top"-->
-<!--                    android:layout_marginTop="@dimen/searchEditText_height"-->
-<!--                    android:layout_marginBottom="@dimen/searchEditText_height" />-->
-
-                <android.support.v4.widget.NestedScrollView
-                    android:id="@+id/nestedScrollView"
+                <FrameLayout
+                    android:id="@+id/notesFrameLayout"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
@@ -79,8 +47,20 @@
                         android:layout_height="match_parent"
                         android:scrollbars="vertical" />
 
-                </android.support.v4.widget.NestedScrollView>
-<!--            </LinearLayout>-->
+                    <LinearLayout
+                        android:id="@+id/noteLightFragmentContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:layout_gravity="center"
+                        android:layout_marginLeft="@dimen/margin_top"
+                        android:layout_marginRight="@dimen/margin_top"
+                        android:layout_marginTop="@dimen/searchEditText_height"
+                        android:layout_marginBottom="@dimen/searchEditText_height"
+                        android:visibility="gone"
+                        android:background="#888888"/>
+                </FrameLayout>
+            </android.support.v4.widget.NestedScrollView>
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton
