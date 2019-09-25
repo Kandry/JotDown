@@ -55,6 +55,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     NoteDB db;
 
     private DrawerLayout drawerLayout;
+    private Toolbar toolbar;
     private ImageView imageView;
     private TextInputEditText title, description;
     private TextView alarmTextView;
@@ -103,7 +104,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         initCamera();
 
-        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString);
+        viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString, wrapContentViewPager);
         wrapContentViewPager.setAdapter(viewPagerAdapter);
     }
 
@@ -118,7 +119,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* ------------------------------- Конец взаимодействий с жизненным циклом активности ------------------------------- */
 
     private void initViews(){
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
@@ -362,6 +363,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* --------------------------------------- Конец взаимодействий с будильником --------------------------------------- */
 
     /* AUDIO ----------------------------------- Взаимодействия с аудиозаписями ----------------------------------------- */
+    @Override
+    public void onBackPressed() {
+        if (isRecord) {
+            recordButtonClick();
+        }
+        super.onBackPressed();
+    }
+
     public void addRecord(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (AppPermissions.getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, AppPermissions.REQUEST_RECORD_AUDIO, this)){
@@ -388,9 +397,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         cameraButton.setEnabled(false);
         imageButton.setEnabled(false);
         fileButton.setEnabled(false);
-        int audioButtonColor = getResources().getColor(R.color.colorAccent);
-        audioRecordingButton.setBackgroundColor(audioButtonColor);
-        // Ограничить доступность остальных действий
+        alarmTextView.setEnabled(false);
+        toolbar.setEnabled(false);
+        audioRecordingButton.setBackground(getResources().getDrawable(R.drawable.customborder_recording));
+        /*int imageButtonPadding = (int) getResources().getDimension(R.dimen.imageButton_padding);
+        audioRecordingButton.setPadding(imageButtonPadding, imageButtonPadding, imageButtonPadding, imageButtonPadding);*/
     }
 
     private void prepareForStop(){
@@ -398,9 +409,11 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         cameraButton.setEnabled(true);
         imageButton.setEnabled(true);
         fileButton.setEnabled(true);
-        int audioButtonColor = getResources().getColor(R.color.selected_background);
-        audioRecordingButton.setBackgroundColor(audioButtonColor);
-        // Снять ограничение доступности остальных действий
+        alarmTextView.setEnabled(true);
+        toolbar.setEnabled(true);
+        audioRecordingButton.setBackground(getResources().getDrawable(R.drawable.customborder_buttons));
+        /*int imageButtonPadding = (int) getResources().getDimension(R.dimen.imageButton_padding);
+        audioRecordingButton.setPadding(imageButtonPadding, imageButtonPadding, imageButtonPadding, imageButtonPadding);*/
     }
     /* -------------------------------------- Конец взаимодействий с аудиозаписями -------------------------------------- */
 

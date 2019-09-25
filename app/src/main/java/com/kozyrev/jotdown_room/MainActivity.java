@@ -1,6 +1,7 @@
 package com.kozyrev.jotdown_room;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.graphics.Color;
@@ -72,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     Menu menu;
 
     FrameLayout notesFrameLayout;
-    LinearLayout noteLightFragmentContainer;
+    FrameLayout noteLightFragmentContainer;
     NoteLightFragment noteLightFragment;
 
     MenuItem itemSearch, itemChooseListView, itemSelectCount, itemClear, itemDelete;
@@ -105,16 +106,17 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler.setItemAnimator(new DefaultItemAnimator());
         notesRecycler.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
 
-        notesFrameLayout = findViewById(R.id.notesFrameLayout);
-       /* notesFrameLayout.setOnClickListener(new View.OnClickListener() {
+        notesFrameLayout = findViewById(R.id.notesFrameLayout);/*
+        notesFrameLayout.setOnTouchListener(new View.OnTouchListener() {
             @Override
-            public void onClick(View view) {
+            public boolean onTouch(View view, MotionEvent motionEvent) {
                 if (isSelected){
                     FragmentManager fragmentManager = getSupportFragmentManager();
                     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
                     fragmentTransaction.remove(noteLightFragment);
                     fragmentTransaction.commit();
                 }
+                return false;
             }
         });*/
         noteLightFragmentContainer = findViewById(R.id.noteLightFragmentContainer);
@@ -220,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @SuppressLint("CommitTransaction")
     private FragmentTransaction fragmentBeginTransaction(){
         FragmentManager fragmentManager = getSupportFragmentManager();
         return fragmentManager.beginTransaction();

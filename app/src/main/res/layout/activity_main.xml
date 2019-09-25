@@ -31,36 +31,36 @@
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-            <android.support.v4.widget.NestedScrollView
-                android:id="@+id/nestedScrollView"
+            <FrameLayout
+                android:id="@+id/notesFrameLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <FrameLayout
-                    android:id="@+id/notesFrameLayout"
+                <android.support.v4.widget.NestedScrollView
+                    android:id="@+id/nestedScrollView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:background="@color/colorBackground">
 
-                    <android.support.v7.widget.RecyclerView
-                        android:id="@+id/notes_recycler"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:scrollbars="vertical" />
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/notes_recycler"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scrollbars="vertical" />
+                </android.support.v4.widget.NestedScrollView>
 
-                    <LinearLayout
-                        android:id="@+id/noteLightFragmentContainer"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_gravity="center"
-                        android:layout_marginLeft="@dimen/margin_top"
-                        android:layout_marginRight="@dimen/margin_top"
-                        android:layout_marginTop="@dimen/searchEditText_height"
-                        android:layout_marginBottom="@dimen/searchEditText_height"
-                        android:visibility="gone"
-                        android:background="#888888"/>
-                </FrameLayout>
-            </android.support.v4.widget.NestedScrollView>
+                <FrameLayout
+                    android:id="@+id/noteLightFragmentContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="@dimen/searchEditText_height"
+                    android:layout_marginBottom="@dimen/searchEditText_height"
+                    android:visibility="gone"
+                    android:background="@drawable/customborder"/>
+            </FrameLayout>
         </LinearLayout>
 
         <android.support.design.widget.FloatingActionButton

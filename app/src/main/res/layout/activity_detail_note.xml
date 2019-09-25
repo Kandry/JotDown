@@ -29,7 +29,8 @@
             android:id="@+id/nextedScrollView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+            app:layout_behavior="@string/appbar_scrolling_view_behavior"
+            android:background="@color/colorBackground">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -60,7 +61,9 @@
                             android:contentDescription="@string/action_add_photo"
                             android:onClick="addPhoto"
                             android:src="@android:drawable/ic_menu_camera"
-                            android:layout_weight = "1"/>
+                            android:layout_weight = "1"
+                            android:background="@drawable/customborder_buttons"
+                            android:layout_margin="5dp"/>
 
                         <ImageButton
                             android:id="@+id/imageButton"
@@ -69,7 +72,9 @@
                             android:contentDescription="@string/action_add_image"
                             android:onClick="addImage"
                             android:src="@android:drawable/ic_menu_gallery"
-                            android:layout_weight = "1"/>
+                            android:layout_weight = "1"
+                            android:background="@drawable/customborder_buttons"
+                            android:layout_margin="5dp"/>
 
                         <ImageButton
                             android:id="@+id/audioRecordingButton"
@@ -79,7 +84,9 @@
                             android:contentDescription="@string/action_add_record"
                             android:onClick="addRecord"
                             android:longClickable="false"
-                            android:src="@android:drawable/ic_btn_speak_now" />
+                            android:src="@android:drawable/ic_btn_speak_now"
+                            android:background="@drawable/customborder_buttons"
+                            android:layout_margin="5dp"/>
 
                         <ImageButton
                             android:id="@+id/fileButton"
@@ -88,7 +95,9 @@
                             android:contentDescription="@string/action_add_file"
                             android:onClick="addFile"
                             android:src="@android:drawable/ic_menu_save"
-                            android:layout_weight = "1"/>
+                            android:layout_weight = "1"
+                            android:background="@drawable/customborder_buttons"
+                            android:layout_margin="5dp"/>
                     </LinearLayout>
 
                     <android.support.design.widget.TextInputLayout
@@ -116,9 +125,9 @@
                         android:id="@+id/textViewAlarmPrompt"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
-                        android:background="@layout/rounded_border_textview"
-                        android:layout_margin="2dp"
-                        android:padding="2dp"
+                        android:background="@drawable/customborder_buttons"
+                        android:layout_margin="5dp"
+                        android:padding="4dp"
                         android:layout_gravity="center"
                         android:gravity="center"/>
 

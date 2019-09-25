@@ -22,6 +22,7 @@
             android:id="@+id/info_image_imageCard"
             android:layout_width="match_parent"
             android:layout_height="200dp"
+            android:layout_marginTop="2dp"
             android:background="@drawable/imageview_in_card_background"
             android:scaleType="centerCrop"/>
 

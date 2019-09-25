@@ -4,29 +4,36 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.kozyrev.jotdown_room.CustomViews.WrapContentHeightViewPager;
 import com.kozyrev.jotdown_room.Fragments.NotesFileFragment;
 import com.kozyrev.jotdown_room.Fragments.RecordingFragment;
+import com.kozyrev.jotdown_room.R;
 
 public class DetailNotePagerAdapter extends FragmentPagerAdapter {
 
     private RecordingFragment recordingFragment;
     private NotesFileFragment notesFileFragment;
-    private int recordsCount = 1, filesCount = 1;
+    private WrapContentHeightViewPager wrapContentViewPager;
 
     public void updatePagerAdapterRecordsCount(int recordsCount){
-        this.recordsCount = recordsCount;
+        if (recordsCount > 0) wrapContentViewPager.setCurrentItem(0);
+        else wrapContentViewPager.setCurrentItem(1);
+
         this.notifyDataSetChanged();
     }
 
     public void updatePagerAdapterFilesCount(int filesCount){
-        this.filesCount = filesCount;
+        if (filesCount > 0) wrapContentViewPager.setCurrentItem(1);
+        else wrapContentViewPager.setCurrentItem(0);
+
         this.notifyDataSetChanged();
     }
 
-    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString){
+    public DetailNotePagerAdapter(FragmentManager fragmentManager, int noteId, String fileUriString, WrapContentHeightViewPager wrapContentViewPager){
         super((fragmentManager));
         recordingFragment = new RecordingFragment(noteId, this);
         notesFileFragment = new NotesFileFragment(fileUriString, this);
+        this.wrapContentViewPager = wrapContentViewPager;
     }
 
     public RecordingFragment getRecordingFragment(){
@@ -39,20 +46,14 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
 
     @Override
     public int getCount(){
-        if (recordsCount > 0 || filesCount > 0) {
-            if (recordsCount > 0 && filesCount > 0) return 2;
-            else return 1;
-        } else {
-            return 0;
-        }
+        return 2;
     }
 
     @Override
     public Fragment getItem(int position){
         switch (position){
             case 0:
-                if (recordsCount > 0) return recordingFragment;
-                else return notesFileFragment;
+                return recordingFragment;
             case 1:
                 return notesFileFragment;
             default:
@@ -64,12 +65,13 @@ public class DetailNotePagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         switch (position){
             case 0:
-                if (recordsCount > 0) return "Records";
-                else return "Files";
+                return "Records";
             case 1:
                 return "Files";
             default:
                 return "";
         }
     }
+
+
 }
