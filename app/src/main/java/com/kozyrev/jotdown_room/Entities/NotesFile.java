@@ -2,7 +2,7 @@ package com.kozyrev.jotdown_room.Entities;
 
 public class NotesFile {
 
-    private String Uri, fullPath, fileName, extension;
+    private String Uri, fullPath, fileName;
 
     public NotesFile(String uri) {
         Uri = uri;
@@ -31,12 +31,4 @@ public class NotesFile {
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
-
-    /*public String getExtension() {
-        return extension;
-    }
-
-    public void setExtension(String extension) {
-        this.extension = extension;
-    }*/
 }

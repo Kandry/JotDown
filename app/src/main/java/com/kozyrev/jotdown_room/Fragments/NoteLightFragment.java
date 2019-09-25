@@ -7,13 +7,10 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.TextInputEditText;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.DB.NoteDB;
@@ -21,9 +18,6 @@ import com.kozyrev.jotdown_room.DetailNoteActivity;
 import com.kozyrev.jotdown_room.MainActivity;
 import com.kozyrev.jotdown_room.R;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 @SuppressLint("ValidFragment")
 public class NoteLightFragment extends Fragment {
 
@@ -41,7 +35,6 @@ public class NoteLightFragment extends Fragment {
         this.position = position;
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -51,13 +44,10 @@ public class NoteLightFragment extends Fragment {
         textTitleLight.setText(String.valueOf(title));
         textDescriptionLight.setText(String.valueOf(description));
 
-        detailButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(getActivity(), DetailNoteActivity.class);
-                intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, noteId);
-                startActivity(intent);
-            }
+        detailButton.setOnClickListener(view -> {
+            Intent intent = new Intent(getActivity(), DetailNoteActivity.class);
+            intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, noteId);
+            startActivity(intent);
         });
         return rootView;
     }

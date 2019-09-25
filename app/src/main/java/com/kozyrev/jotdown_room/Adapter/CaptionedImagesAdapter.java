@@ -39,25 +39,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
     @NonNull
     @Override
     public AppViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
-        AppViewHolder viewHolder = ViewHolderFactory.create(parent, viewType, dataSet);
-        CardView cardView = (CardView) viewHolder.itemView;
-/*
-        cardView.setOnClickListener((v) -> {
-            int adapterPosition = viewHolder.getAdapterPosition();
-            if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
-                listener.onClick(adapterPosition);
-            }
-        });*/
-
-        /*cardView.setOnLongClickListener(v -> {
-            int adapterPosition = viewHolder.getAdapterPosition();
-            if (adapterPosition != RecyclerView.NO_POSITION && listener != null) {
-                listener.onLongClick(adapterPosition);
-            }
-            return true;
-        });*/
-
-        return viewHolder;
+        return ViewHolderFactory.create(parent, viewType, dataSet);
     }
 
     @Override
@@ -79,16 +61,7 @@ public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> 
         this.notifyDataSetChanged();
     }
 
-    /*public void setListener(Listener listener){
-        this.listener = listener;
-    }*/
-
     public void setSelectionTracker(SelectionTracker selectionTracker){
         this.selectionTracker = selectionTracker;
     }
-/*
-    public interface Listener{
-        void onClick(int position);
-       // void onLongClick(int position);
-    }*/
 }

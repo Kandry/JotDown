@@ -1,7 +1,6 @@
 package com.kozyrev.jotdown_room.RowTypes;
 
 import android.support.v7.widget.RecyclerView;
-import android.widget.TextView;
 
 import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.Factory.ViewHolderFactory;

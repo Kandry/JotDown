@@ -17,9 +17,6 @@ import com.kozyrev.jotdown_room.R;
 
 import java.util.ArrayList;
 
-/**
- * A simple {@link Fragment} subclass.
- */
 @SuppressLint("ValidFragment")
 public class RecordingFragment extends Fragment {
 

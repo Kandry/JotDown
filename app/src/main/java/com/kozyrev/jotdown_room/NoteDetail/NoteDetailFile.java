@@ -93,7 +93,6 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
     private void addFileToFileArrayList(String fileUri, String filePath){
         NotesFile notesFile = new NotesFile(fileUri);
         notesFile.setFileName(getFileName(filePath));
-        //notesFile.setExtension(getFileExtension(filePath));
         notesFile.setFullPath(filePath);
         fileArraylist.add(notesFile);
     }
@@ -114,16 +113,6 @@ public class NoteDetailFile implements FileItemTouchHelper.RecyclerItemTouchHelp
         }
         return fileName;
     }
-/*
-    private String getFileExtension(String filePath){
-        String extension = "";
-        try{
-            extension = filePath.substring(filePath.lastIndexOf(".") + 1);
-        }catch(Exception ex){
-            ex.printStackTrace();
-        }
-        return  extension;
-    }*/
 
     public String getFileUriString() {
         return fileUriString;

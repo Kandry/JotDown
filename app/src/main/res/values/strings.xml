@@ -20,6 +20,11 @@
     <string name="action_add_record">Add record</string>
     <string name="action_add_file">Add file</string>
     <string name="alarm_canceled_message">Alarm canceled</string>
+    <string name="get_need_permissions">Для корректной работы приложения предоставьте необходимые разрешения</string>
+    <string name="request_write_external_storage">Нет разрешения на запись, фото не сохранено</string>
+    <string name="request_read_external_storage">Нет разрешения на чтение, файл не прикреплен</string>
+    <string name="request_record_audio">Нет разрешений на работу с аудио. Аудозаметка не сохранена</string>
+    <string name="select_picture">Select Picture</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

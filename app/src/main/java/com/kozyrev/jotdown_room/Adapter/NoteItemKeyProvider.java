@@ -2,7 +2,6 @@ package com.kozyrev.jotdown_room.Adapter;
 
 import androidx.recyclerview.selection.ItemKeyProvider;
 
-import com.kozyrev.jotdown_room.DB.Note;
 import com.kozyrev.jotdown_room.RowTypes.RowType;
 
 import java.util.List;
@@ -23,5 +22,5 @@ public class NoteItemKeyProvider extends ItemKeyProvider {
     public Object getKey(int position) {return itemList.get(position);}
 
     @Override
-    public int getPosition(@NonNull Object key) {return itemList.indexOf(key);}
+    public int getPosition(@android.support.annotation.NonNull @NonNull Object key) {return itemList.indexOf(key);}
 }

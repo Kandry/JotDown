@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 
 public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchHelperListener {
@@ -52,12 +51,7 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
         File root = getRoot();
         File[] files = getNoteRecordsDirectoryFiles(root);
         if (files != null){
-            Arrays.sort(files, new Comparator<File>() {
-                @Override
-                public int compare(File file1, File file2) {
-                    return file1.toString().compareTo(file2.toString());
-                }
-            });
+            Arrays.sort(files, (file1, file2) -> file1.toString().compareTo(file2.toString()));
 
             for (int i = 0; i < files.length; i++) {
                 addRecordToRecordingArrayList(i, root, files);
@@ -179,9 +173,5 @@ public class NoteAudioRecord implements RecordItemTouchHelper.RecyclerItemTouchH
             snackbar.setActionTextColor(Color.YELLOW);
             snackbar.show();
         }
-    }
-
-    public int getRecordingsCount(){
-        return recordingArraylist.size();
     }
 }

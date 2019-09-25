@@ -1,17 +1,17 @@
 package com.kozyrev.jotdown_room;
 
+import android.Manifest;
 import android.arch.persistence.room.Room;
 import android.content.Intent;
 import android.graphics.Color;
+import android.os.Build;
 import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ActionMode;
@@ -32,8 +32,6 @@ import android.view.View;
 import android.support.v7.widget.SearchView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.OnDragInitiatedListener;
@@ -53,7 +51,6 @@ import com.kozyrev.jotdown_room.RowTypes.TextRowType;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import io.reactivex.Flowable;
@@ -68,7 +65,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     RecyclerView notesRecycler;
     Toolbar toolbar;
     DrawerLayout drawerLayout;
-    NavigationView navigationView;
     SearchView searchView;
 
     SelectionTracker selectionTracker;
@@ -95,10 +91,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         initViews();
         initDB();
-/*
-        if (savedInstanceState != null) {
-            selectionTracker.onRestoreInstanceState(savedInstanceState);
-        }*/
     }
 
     private void initViews(){
@@ -106,12 +98,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
 
         notesRecycler = findViewById(R.id.notes_recycler);
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(1, 1);
@@ -150,7 +136,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         itemClear = menu.findItem(R.id.action_clear);
         itemDelete = menu.findItem(R.id.action_delete);
 
-        //SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) itemSearch.getActionView();
         searchView.setOnQueryTextListener(this);
 
@@ -214,13 +199,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         super.onResume();
 
         if (isSelected && (noteLightFragment != null)){
-            /* ВЫНЕСТИ В МЕТОД */
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.remove(noteLightFragment);
-            noteLightFragmentContainer.setVisibility(View.GONE);
-            noteLightFragment = null;
-            fragmentTransaction.commit();
+            removeFragmentAndCommit();
         }
 
         if (searchView != null) {
@@ -235,16 +214,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onBackPressed() {
         if (isSelected && (noteLightFragment != null)){
-            /* ВЫНЕСТИ В МЕТОД */
-            FragmentManager fragmentManager = getSupportFragmentManager();
-            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-            fragmentTransaction.remove(noteLightFragment);
-            noteLightFragmentContainer.setVisibility(View.GONE);
-            noteLightFragment = null;
-            fragmentTransaction.commit();
+            removeFragmentAndCommit();
         } else {
             super.onBackPressed();
         }
+    }
+
+    private FragmentTransaction fragmentBeginTransaction(){
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        return fragmentManager.beginTransaction();
+    }
+
+    private void removeFragment(FragmentTransaction fragmentTransaction){
+        fragmentTransaction.remove(noteLightFragment);
+        noteLightFragmentContainer.setVisibility(View.GONE);
+        noteLightFragment = null;
+    }
+
+    private void removeFragmentAndCommit() {
+        FragmentTransaction fragmentTransaction = fragmentBeginTransaction();
+        removeFragment(fragmentTransaction);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -260,15 +250,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .subscribe(new DisposableSubscriber<List<Note>>() {
                     @Override
                     public void onNext(List<Note> listNote) {
-                        Log.d("DEBUGBAG", "TEST123");
                         if (!isSearch) {
                             notesList = listNote;
                             if(notesRecycler.getAdapter() != null){
                                 updateAdapter();
-                                Log.d("DEBUGBAG", "TEST1234");
                             } else {
                                 createAdapter();
-                                Log.d("DEBUGBAG", "TEST1235");
                             }
                         }
                     }
@@ -308,17 +295,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 .withOnItemActivatedListener(new OnItemActivatedListener<Long>() {
                     @Override
                     public boolean onItemActivated(@NonNull ItemDetailsLookup.ItemDetails<Long> item, @NonNull MotionEvent motionEvent) {
-                        FragmentManager fragmentManager = getSupportFragmentManager();
-                        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+                        FragmentTransaction fragmentTransaction = fragmentBeginTransaction();
                         Note note = notesList.get(item.getPosition());
-
                         int pastNoteId = -1;
 
                         if (isSelected && (noteLightFragment != null)){
-                            fragmentTransaction.remove(noteLightFragment);
-                            noteLightFragmentContainer.setVisibility(View.GONE);
                             pastNoteId = noteLightFragment.getNoteId();
-                            noteLightFragment = null;
+                            removeFragment(fragmentTransaction);
                         }
 
                         if (pastNoteId != note.getUid()) {
@@ -327,10 +310,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             fragmentTransaction.add(R.id.noteLightFragmentContainer, noteLightFragment);
                         }
                         fragmentTransaction.commit();
-/*
-                        Intent intent = new Intent(MainActivity.this, DetailNoteActivity.class);
-                        intent.putExtra(DetailNoteActivity.EXTRA_NOTE_ID, notesList.get(item.getPosition()).getUid());
-                        startActivity(intent);*/
 
                         isSelected = true;
                         return true;
@@ -371,12 +350,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     setMenuVisisble(false);
                     setMenuItemTitle(selectionTracker.getSelection().size());
                     selectionTracker.clearSelection();
-                }
-
-                Iterator<RowType> itemIterable = selectionTracker.getSelection().iterator();
-                while (itemIterable.hasNext()){
-                    Log.d("select+++", itemIterable.next().toString());
-                    Log.d("select-", "Click4");
                 }
             }
 
@@ -429,10 +402,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
     private void deleteNote(int position){
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+            if (AppPermissions.getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, AppPermissions.REQUEST_WRITE_EXTERNAL_STORAGE, this)){
+                deleteNodeFromStorage(position);
+            }
+        } else {
+            deleteNodeFromStorage(position);
+        }
+    }
+
+    private void deleteNodeFromStorage(int position){
         int noteId =  removedNotes.get(position).getUid();
         Note note = db.getNoteDAO().getNoteById(noteId);
-
-        // РАЗРЕШЕНИЯ СПРОСИТЬ
         File root = android.os.Environment.getExternalStorageDirectory();
         String path = root.getAbsolutePath() + "/VoiceRecords/Note" + noteId;
         File directory = new File(path);
@@ -446,7 +427,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         db.getNoteDAO().delete(note);
     }
-
 
     public void setMenuItemTitle(int selectedItemSize) {
         itemSelectCount.setTitle("" + selectedItemSize);

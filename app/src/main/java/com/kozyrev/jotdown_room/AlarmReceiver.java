@@ -12,10 +12,8 @@ import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
-import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.support.v4.app.NotificationCompat;
-import android.widget.Toast;
 
 import com.squareup.picasso.Picasso;
 

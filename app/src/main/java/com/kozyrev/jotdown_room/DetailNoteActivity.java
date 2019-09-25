@@ -1,19 +1,13 @@
 package com.kozyrev.jotdown_room;
 
 import android.Manifest;
-import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.arch.persistence.room.Room;
-import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
-import android.provider.DocumentsContract;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
@@ -23,16 +17,12 @@ import android.support.transition.TransitionManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
-import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.ShareActionProvider;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -56,10 +46,6 @@ import io.reactivex.disposables.Disposable;
 
 public class DetailNoteActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private static final int REQUEST_WRITE_EXTERNAL_STORAGE = 100;
-    private static final int REQUEST_READ_EXTERNAL_STORAGE = 101;
-    private static final int REQUEST_RECORD_AUDIO = 102;
-
     private static final int REQUEST_GALLERY = 200;
     private static final int START_CAMERA_APP = 201;
     private static final int REQUEST_PROVIDER = 202;
@@ -69,20 +55,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     NoteDB db;
 
     private DrawerLayout drawerLayout;
-    private NavigationView navigationView;
-    private Toolbar toolbar;
-    private NestedScrollView nestedScrollView;
     private ImageView imageView;
     private TextInputEditText title, description;
     private TextView alarmTextView;
     private LinearLayout buttonsLayout;
     private ImageButton cameraButton, imageButton, audioRecordingButton, fileButton;
     private WrapContentHeightViewPager wrapContentViewPager;
-    private TabLayout tabLayout;
 
     private Calendar calendar = Calendar.getInstance();
-    private ShareActionProvider shareActionProvider;
-    private Chronometer chronometer;
 
     private NoteAlarm noteAlarm;
     private NoteCamera noteCamera;
@@ -111,12 +91,10 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         initViews();
         initDB();
 
-        noteId = (savedInstanceState != null)
-                    ? savedInstanceState.getInt("noteId")
-                    : (
-                        (getIntent().getExtras() != null)
-                                ? (int) getIntent().getExtras().get(EXTRA_NOTE_ID)
-                                : -1);
+        noteId = (savedInstanceState != null) ? savedInstanceState.getInt("noteId") : (
+                                                                                                (getIntent().getExtras() != null)
+                                                                                                        ? (int) getIntent().getExtras().get(EXTRA_NOTE_ID)
+                                                                                                        : -1);
 
         initAlarm();
         downloadData();
@@ -127,8 +105,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         viewPagerAdapter = new DetailNotePagerAdapter(getSupportFragmentManager(), noteId, fileUriString);
         wrapContentViewPager.setAdapter(viewPagerAdapter);
-
-
     }
 
     @Override
@@ -140,20 +116,15 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         }
     }
     /* ------------------------------- Конец взаимодействий с жизненным циклом активности ------------------------------- */
+
     private void initViews(){
-        toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         drawerLayout = findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.nav_open_drawer, R.string.nav_close_drawer);
-        drawerLayout.addDrawerListener(toggle);
-        toggle.syncState();
 
-        nestedScrollView = findViewById(R.id.nextedScrollView);
+        NestedScrollView nestedScrollView = findViewById(R.id.nextedScrollView);
         nestedScrollView.setFillViewport(true);
-
-        navigationView = findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
 
         title = findViewById(R.id.textTitle);
         description = findViewById(R.id.textDescription);
@@ -167,7 +138,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         fileButton = findViewById(R.id.fileButton);
 
         wrapContentViewPager = findViewById(R.id.viewpager);
-        tabLayout = findViewById(R.id.tablayout);
+        TabLayout tabLayout = findViewById(R.id.tablayout);
         tabLayout.setupWithViewPager(wrapContentViewPager);
     }
 
@@ -218,20 +189,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             public void onError(Throwable e) {e.printStackTrace();}
         };
         noteSingle.subscribe(observer);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    public boolean getNeedPermissions(String[] permissions, int requestCode){
-        for (String permission : permissions) {
-            if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
-                if (shouldShowRequestPermissionRationale(permission)){
-                    Toast.makeText(this, "Для корректной работы приложения предоставьте необходимые разрешения", Toast.LENGTH_SHORT).show();
-                }
-                requestPermissions(permissions, requestCode);
-                return false;
-            }
-        }
-        return true;
     }
 
     /* TOOLBAR ------------------------------- Взаимодействия с панелью приложения -------------------------------------- */
@@ -290,28 +247,28 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults){
         switch (requestCode){
-            case (REQUEST_WRITE_EXTERNAL_STORAGE):
+            case (AppPermissions.REQUEST_WRITE_EXTERNAL_STORAGE):
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     callCameraApp();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Нет разрешения на запись, фото не сохранено", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.request_write_external_storage, Toast.LENGTH_LONG).show();
                     finishAffinity();
                 }
                 break;
-            case (REQUEST_READ_EXTERNAL_STORAGE):
+            case (AppPermissions.REQUEST_READ_EXTERNAL_STORAGE):
                 if(grantResults[0] == PackageManager.PERMISSION_GRANTED){
                     fileButtonClick();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Нет разрешения на чтение, файл не прикреплен", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getApplicationContext(), R.string.request_read_external_storage, Toast.LENGTH_LONG).show();
                     finishAffinity();
                 }
                 break;
-            case (REQUEST_RECORD_AUDIO):
+            case (AppPermissions.REQUEST_RECORD_AUDIO):
                 if (!(grantResults.length == 3 &&
                         grantResults[0] == PackageManager.PERMISSION_GRANTED
                         && grantResults[1] == PackageManager.PERMISSION_GRANTED
                         && grantResults[2] == PackageManager.PERMISSION_GRANTED)){
-                    Toast.makeText(this, "Нет разрешений на работу с аудио. Аудозаметка не сохранена", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, R.string.request_record_audio, Toast.LENGTH_SHORT).show();
                     finishAffinity();
                 }
                 break;
@@ -338,15 +295,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         db.getNoteDAO().update(note);
     }
     /* ------------------------------------------- Конец взаимодействий с БД -------------------------------------------- */
-
-    /* SHARE --------------------------------- Взаимодействия с отправкой заметки --------------------------------------- */
-    private void setShareActionIntent(String text){
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.setType("text/plain");
-        intent.putExtra(Intent.EXTRA_TEXT, text);
-        shareActionProvider.setShareIntent(intent);
-    }
-    /* ------------------------------------ Конец взаимодействий с отправкой заметки ------------------------------------ */
 
     /* IMAGE ----------------------------------- Взаимодействия с изображениями ----------------------------------------- */
     public void addImage(View view){
@@ -378,7 +326,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     public void addPhoto(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_WRITE_EXTERNAL_STORAGE)){
+            if (AppPermissions.getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, AppPermissions.REQUEST_WRITE_EXTERNAL_STORAGE, this)){
                 callCameraApp();
             }
         } else {
@@ -416,7 +364,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* AUDIO ----------------------------------- Взаимодействия с аудиозаписями ----------------------------------------- */
     public void addRecord(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, REQUEST_RECORD_AUDIO)){
+            if (AppPermissions.getNeedPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, AppPermissions.REQUEST_RECORD_AUDIO, this)){
                 recordButtonClick();
             }
         } else {
@@ -459,7 +407,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     /* FILES -------------------------------------- Взаимодействия с файлами -------------------------------------------- */
     public void addFile(View view){
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (getNeedPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_EXTERNAL_STORAGE)){
+            if (AppPermissions.getNeedPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, AppPermissions.REQUEST_READ_EXTERNAL_STORAGE, this)){
                 fileButtonClick();
             }
         } else {
@@ -480,133 +428,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         String fileUriToString = fileUri.toString();
         String filePath = "";
-        filePath = getPath(this, fileUri);
+        filePath = GetPath.getPath(this, fileUri);
 
         viewPagerAdapter.getNotesFileFragment().noteDetailFile.addFileUri(fileUriToString, filePath);
-    }
-
-
-    @TargetApi(Build.VERSION_CODES.KITKAT)
-    private static String getPath(final Context context, final Uri uri) {
-
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-
-        // DocumentProvider
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
-            // ExternalStorageProvider
-            if (isExternalStorageDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-
-                if ("primary".equalsIgnoreCase(type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + split[1];
-                }
-
-                // TODO handle non-primary volumes
-            }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
-
-                final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId(
-                        Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-
-                return getDataColumn(context, contentUri, null, null);
-            }
-            // MediaProvider
-            else if (isMediaDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
-                final String[] split = docId.split(":");
-                final String type = split[0];
-
-                Uri contentUri = null;
-                if ("image".equals(type)) {
-                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                } else if ("video".equals(type)) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                } else if ("audio".equals(type)) {
-                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                }
-
-                final String selection = "_id=?";
-                final String[] selectionArgs = new String[] {
-                        split[1]
-                };
-
-                return getDataColumn(context, contentUri, selection, selectionArgs);
-            }
-        }
-        // MediaStore (and general)
-        else if ("content".equalsIgnoreCase(uri.getScheme())) {
-
-            // Return the remote address
-            if (isGooglePhotosUri(uri))
-                return uri.getLastPathSegment();
-
-            return getDataColumn(context, uri, null, null);
-        }
-        // File
-        else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
-        }
-
-        return null;
-    }
-
-    private static String getDataColumn(Context context, Uri uri, String selection,
-                                       String[] selectionArgs) {
-
-        Cursor cursor = null;
-        final String column = "_data";
-        final String[] projection = {
-                column
-        };
-
-        try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs,
-                    null);
-            if (cursor != null && cursor.moveToFirst()) {
-                final int index = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(index);
-            }
-        } finally {
-            if (cursor != null)
-                cursor.close();
-        }
-        return null;
-    }
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is ExternalStorageProvider.
-     */
-    private static boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is DownloadsProvider.
-     */
-    private static boolean isDownloadsDocument(Uri uri) {
-        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
-    }
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is MediaProvider.
-     */
-    private static boolean isMediaDocument(Uri uri) {
-        return "com.android.providers.media.documents".equals(uri.getAuthority());
-    }
-
-    /**
-     * @param uri The Uri to check.
-     * @return Whether the Uri authority is Google Photos.
-     */
-    private static boolean isGooglePhotosUri(Uri uri) {
-        return "com.google.android.apps.photos.content".equals(uri.getAuthority());
     }
     /* ----------------------------------------- Конец взаимодействий с файлами ----------------------------------------- */
 }

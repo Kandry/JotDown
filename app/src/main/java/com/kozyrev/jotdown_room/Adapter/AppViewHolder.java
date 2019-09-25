@@ -10,7 +10,7 @@ public class AppViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
     }
 
-    public final void bind(boolean isActive){
+    final void bind(boolean isActive){
         itemView.setActivated(isActive);
     }
 }

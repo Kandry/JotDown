@@ -26,7 +26,6 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
 
     private Context context;
     private MediaPlayer mediaPlayer;
-    //private RecordsListener recordsListener;
 
     private ArrayList<Recording> recordingArrayList;
 
@@ -53,17 +52,7 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.recording_item_layout, parent, false);
-        ViewHolder viewHolder = new ViewHolder(view);
-/*
-        view.setOnLongClickListener(v -> {
-            int adapterPosition = viewHolder.getAdapterPosition();
-            if (adapterPosition != RecyclerView.NO_POSITION && recordsListener != null) {
-                recordsListener.onLongClick(adapterPosition);
-            }
-            return true;
-        });*/
-
-        return viewHolder;
+        return new ViewHolder(view);
     }
 
     @Override
@@ -80,7 +69,6 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
     private void setUpData(ViewHolder holder, int position){
         Recording recording = recordingArrayList.get(position);
         holder.textViewName.setText(recording.getFileName());
-        //holder.seekBar.setSampleFrom(recording.getUri());
 
         if(recording.isPlaying() && !isHaveToStop){
             holder.imageViewPlay.setImageResource(R.drawable.ic_add_white_24dp);
@@ -102,14 +90,12 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
         public RelativeLayout foregroundLayout;
 
         ImageView imageViewPlay;
-        //WaveformSeekBar seekBar;
         SeekBar seekBar;
         TextView textViewName;
 
         ViewHolder holder;
         private Handler handler = new Handler();
 
-        private int lastProgress = 0;
         private String recordingUri;
 
         public ViewHolder(@NonNull View itemView) {
@@ -146,7 +132,6 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
                     startPlaying(recording, position);
                     recording.setPlaying(true);
                     seekBar.setMax(mediaPlayer.getDuration());
-                    //seekBar.setSampleFrom(recordingUri);
                     notifyItemChanged(position);
                     last_index = position;
                 }
@@ -154,15 +139,6 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
         }
 
         void manageSeekBar(ViewHolder holder){
-           /* holder.seekBar.setOnProgressChanged(new SeekBarOnProgressChanged() {
-                @Override
-                public void onProgressChanged(@NonNull WaveformSeekBar waveformSeekBar, int progress, boolean fromUser) {
-                    if(mediaPlayer != null && fromUser){
-                        mediaPlayer.seekTo(progress);
-                    }
-                }
-            });*/
-
             holder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -183,12 +159,6 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
             for (Recording record : recordingArrayList) {
                 record.setPlaying(false);
             }
-            /*
-            for( int i=0; i < recordingArrayList.size(); i++ ){
-                recordingArrayList.get(i).setPlaying(false);
-                recordingArrayList.set(i,recordingArrayList.get(i));
-            }
-             */
             notifyDataSetChanged();
         }
 
@@ -199,9 +169,7 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
             if(mediaPlayer != null){
                 int currentPosition = mediaPlayer.getCurrentPosition();
                 holder.seekBar.setMax(mediaPlayer.getDuration());
-                //holder.seekBar.setSampleFrom(recordingUri);
                 holder.seekBar.setProgress(currentPosition);
-                lastProgress = currentPosition;
             }
             handler.postDelayed(runnable, 100);
         }
@@ -228,7 +196,6 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
             }
 
             seekBar.setMax(mediaPlayer.getDuration());
-            //seekBar.setSampleFrom(recordingUri);
             isPlaying = true;
 
             mediaPlayer.setOnCompletionListener((mp) -> {
@@ -237,12 +204,4 @@ public class RecordingAdapter extends RecyclerView.Adapter<RecordingAdapter.View
             });
         }
     }
-/*
-    public void setRecordsListener(RecordsListener recordsListener){
-        this.recordsListener = recordsListener;
-    }
-
-    public interface RecordsListener{
-        void onLongClick(int position);
-    }*/
 }
