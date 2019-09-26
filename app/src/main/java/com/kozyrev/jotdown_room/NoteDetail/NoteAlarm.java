@@ -38,7 +38,7 @@ public class NoteAlarm {
     private Date alarmTime;
     private AlarmManager alarmService;
     private int noteId;
-    private String title, description, imageUriString;
+    private String title, description;
 
     private int alarmTextViewHeight;
 
@@ -105,16 +105,15 @@ public class NoteAlarm {
         } else {
             setAlarmTextViewParams(alarmTextViewHeight);
             alarmTextView.setText(alarmTime.toString());
-            setAlarm(calendar, noteId, title, description, imageUriString);
+            setAlarm(calendar, noteId, title, description);
         }
     };
 
-    public void openDatePickerDialog(Date updateDate, String title, String description, String imageUriString){
+    public void openDatePickerDialog(Date updateDate, String title, String description){
         if (updateDate != null) calendar.setTime(updateDate);
 
         this.title = title;
         this.description = description;
-        this.imageUriString = imageUriString;
 
         DatePickerDialog datePickerDialog = new DatePickerDialog(activityContext, onDateSetListener,
                 calendar.get(Calendar.YEAR),
@@ -132,18 +131,17 @@ public class NoteAlarm {
         timePickerDialog.show();
     }
 
-    public void setAlarm(Calendar targetCal, int noteId, String title, String description, String imageUriString){
+    public void setAlarm(Calendar targetCal, int noteId, String title, String description){
         alarmTime = targetCal.getTime();
         String alarmText = alarmTime.toString();
-        newAlarmIntent(alarmText, targetCal, noteId, title, description, imageUriString);
+        newAlarmIntent(alarmText, targetCal, noteId, title, description);
     }
 
-    private void newAlarmIntent(String alarmText, Calendar targetCal, int noteId, String title, String description, String imageUriString){
+    private void newAlarmIntent(String alarmText, Calendar targetCal, int noteId, String title, String description){
         Intent intent = new Intent(appContext, AlarmReceiver.class);
         intent.putExtra(AlarmReceiver.EXTRA_NOTE_ID, noteId);
         intent.putExtra(AlarmReceiver.EXTRA_TITLE, title);
         intent.putExtra(AlarmReceiver.EXTRA_CONTENT_TEXT, description);
-        intent.putExtra(AlarmReceiver.EXTRA_URI, imageUriString);
         intent.setAction(alarmText);
 
         PendingIntent pendingIntent = PendingIntent.getBroadcast(appContext, RQS_TIME, intent, FLAG_CANCEL_CURRENT);
@@ -151,9 +149,9 @@ public class NoteAlarm {
         alarmManager.set(AlarmManager.RTC_WAKEUP, targetCal.getTimeInMillis(), pendingIntent);
     }
 
-    public void updateAlarm(String title, String description, String imageUriString){
+    public void updateAlarm(String title, String description){
         cancelAlarm(alarmTime.toString());
-        openDatePickerDialog(alarmTime, title, description, imageUriString);
+        openDatePickerDialog(alarmTime, title, description);
     }
 
     public void cancelAlarm(String alarmText){

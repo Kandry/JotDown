@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical">
 
     <RelativeLayout
@@ -15,15 +13,14 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
+            android:layout_alignParentStart="true"
             android:layout_centerVertical="true"
-            android:layout_gravity="end"
-            android:layout_marginEnd="8dp"
-            android:text="Delete"
-            android:textColor="#fff"
-            android:textSize="13sp" />
+            android:layout_gravity="left"
+            android:layout_marginStart="8dp"
+            android:text="@string/delete"
+            android:textColor="#FFEB3B"
+            android:textAppearance="?android:attr/textAppearanceLarge" />
     </RelativeLayout>
-
 
     <RelativeLayout
         android:id="@+id/view_foreground"
@@ -67,18 +64,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:visibility="gone"/>
-
-<!--            <com.masoudss.lib.WaveformSeekBar-->
-<!--                app:wave_width="5dp"-->
-<!--                app:wave_gap="2dp"-->
-<!--                app:wave_min_height="5dp"-->
-<!--                app:wave_corner_radius="2dp"-->
-<!--                app:wave_background_color="@color/colorAccent"-->
-<!--                app:wave_progress_color="@color/colorPrimary"-->
-<!--                app:wave_gravity="center"-->
-<!--                android:id="@+id/seekBar"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="20dp"/>-->
 
             <View
                 android:layout_width="match_parent"

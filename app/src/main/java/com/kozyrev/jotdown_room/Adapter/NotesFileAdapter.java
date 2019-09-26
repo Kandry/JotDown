@@ -75,10 +75,6 @@ public class NotesFileAdapter extends RecyclerView.Adapter<NotesFileAdapter.View
         ImageView imageViewFile;
         TextView textViewName;
 
-       // NotesFileAdapter.ViewHolder holder;
-
-        //private String fileUri;
-
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 

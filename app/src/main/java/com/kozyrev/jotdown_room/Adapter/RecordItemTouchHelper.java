@@ -43,7 +43,7 @@ public class RecordItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
-    public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder,
+    public void onChildDraw(@NonNull Canvas c, @NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder,
                             float dX, float dY, int actionState, boolean isCurrentlyActive) {
         super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
 
@@ -55,7 +55,7 @@ public class RecordItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
-    public void onChildDrawOver(Canvas c, RecyclerView recyclerView,
+    public void onChildDrawOver(@NonNull Canvas c, @NonNull  RecyclerView recyclerView,
                                 RecyclerView.ViewHolder viewHolder, float dX, float dY,
                                 int actionState, boolean isCurrentlyActive) {
         super.onChildDrawOver(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
@@ -67,7 +67,7 @@ public class RecordItemTouchHelper extends ItemTouchHelper.SimpleCallback {
     }
 
     @Override
-    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+    public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
         super.clearView(recyclerView, viewHolder);
 
         final View foregroundView =

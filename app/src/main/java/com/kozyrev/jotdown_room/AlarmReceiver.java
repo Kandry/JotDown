@@ -26,7 +26,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     public static final int NOTIFICATION_ID = 5453;
     public static final String CHANNEL_ID = "1234";
 
-    public static final String EXTRA_NOTE_ID = "noteId", EXTRA_TITLE = "title", EXTRA_CONTENT_TEXT = "contentText", EXTRA_URI = "uri";
+    public static final String EXTRA_NOTE_ID = "noteId", EXTRA_TITLE = "title", EXTRA_CONTENT_TEXT = "contentText";
 
 
     @Override
@@ -35,11 +35,10 @@ public class AlarmReceiver extends BroadcastReceiver {
                 context,
                 intent.getStringExtra(EXTRA_TITLE),
                 intent.getStringExtra(EXTRA_CONTENT_TEXT),
-                intent.getStringExtra(EXTRA_URI),
                 intent.getIntExtra(EXTRA_NOTE_ID,0));
     }
 
-    private void showNotification(Context context, String title, String contentText, String imageUriString, int noteId){
+    private void showNotification(Context context, String title, String contentText, int noteId){
         NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
         NotificationCompat.Builder builder;
 
@@ -55,7 +54,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             setBuilderParams(builder,
                     title,
                     contentText,
-                    imageUriString,
                     R.mipmap.ic_launcher_round);
         }
         else {
@@ -63,7 +61,6 @@ public class AlarmReceiver extends BroadcastReceiver {
             setBuilderParams(builder,
                     title,
                     contentText,
-                    imageUriString,
                     R.mipmap.ic_launcher);
         }
 
@@ -74,23 +71,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
-    private void setBuilderParams(NotificationCompat.Builder builder, String title, String contentText, String imageUriString, int icon){
-        //Bitmap bitmap = null;
-        /*
-        try {
-            bitmap = Picasso.get().load(Uri.parse(imageUriString)).get();
-        } catch (IOException ex){
-            ex.printStackTrace();
-        }*/
-
-        /*if (!imageUriString.equals("")) {
-            bitmap = BitmapFactory.decodeFile(imageUriString);
-            //Bitmap bitmap = MediaStore.Images.Media.getBitmap(ContentResolver.get)
-            //finalBitmap = Bitmap.createScaledBitmap(bitmap, 800, 450, false);
-        }*/
+    private void setBuilderParams(NotificationCompat.Builder builder, String title, String contentText, int icon){
 
         builder.setSmallIcon(icon)
-//                .setLargeIcon(bitmap)
                 .setContentTitle(title)
                 .setContentText(contentText)
                 .setWhen(System.currentTimeMillis())

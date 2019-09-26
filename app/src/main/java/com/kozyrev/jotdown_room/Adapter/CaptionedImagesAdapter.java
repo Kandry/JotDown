@@ -16,7 +16,6 @@ import java.util.List;
 
 public class CaptionedImagesAdapter extends RecyclerView.Adapter<AppViewHolder> {
 
-    //private Listener listener;
     private List<RowType> dataSet;
     private SelectionTracker selectionTracker;
 

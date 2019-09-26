@@ -9,12 +9,10 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.app.AppCompatActivity;
@@ -124,7 +122,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
         drawerLayout = findViewById(R.id.drawer_layout);
 
-        NestedScrollView nestedScrollView = findViewById(R.id.nextedScrollView);
+        NestedScrollView nestedScrollView = findViewById(R.id.nestedScrollViewDetail);
         nestedScrollView.setFillViewport(true);
 
         title = findViewById(R.id.textTitle);
@@ -204,7 +202,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         switch (item.getItemId()){
             case R.id.action_create_notify:
                 alarmTextView.setText("");
-                noteAlarm.openDatePickerDialog(null, title.getText().toString(), description.getText().toString(), imageUriString);
+                noteAlarm.openDatePickerDialog(null, title.getText().toString(), description.getText().toString());
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -348,7 +346,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         noteAlarm.initAlarmListeners();
 
         alarmTextView.setOnClickListener(v -> {
-            noteAlarm.updateAlarm(title.getText().toString(), description.getText().toString(), imageUriString);
+            noteAlarm.updateAlarm(title.getText().toString(), description.getText().toString());
         });
     }
 
@@ -369,6 +367,14 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
             recordButtonClick();
         }
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (isRecord) {
+            recordButtonClick();
+        }
+        super.onDestroy();
     }
 
     public void addRecord(View view){
@@ -399,9 +405,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         fileButton.setEnabled(false);
         alarmTextView.setEnabled(false);
         toolbar.setEnabled(false);
+        wrapContentViewPager.setEnabled(false);
         audioRecordingButton.setBackground(getResources().getDrawable(R.drawable.customborder_recording));
-        /*int imageButtonPadding = (int) getResources().getDimension(R.dimen.imageButton_padding);
-        audioRecordingButton.setPadding(imageButtonPadding, imageButtonPadding, imageButtonPadding, imageButtonPadding);*/
     }
 
     private void prepareForStop(){
@@ -411,9 +416,8 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
         fileButton.setEnabled(true);
         alarmTextView.setEnabled(true);
         toolbar.setEnabled(true);
+        wrapContentViewPager.setEnabled(true);
         audioRecordingButton.setBackground(getResources().getDrawable(R.drawable.customborder_buttons));
-        /*int imageButtonPadding = (int) getResources().getDimension(R.dimen.imageButton_padding);
-        audioRecordingButton.setPadding(imageButtonPadding, imageButtonPadding, imageButtonPadding, imageButtonPadding);*/
     }
     /* -------------------------------------- Конец взаимодействий с аудиозаписями -------------------------------------- */
 

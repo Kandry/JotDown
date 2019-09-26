@@ -21,8 +21,7 @@ import java.util.ArrayList;
 public class RecordingFragment extends Fragment {
 
     private int noteId;
-    private boolean isRecord = false;
-    private ArrayList<Recording> recordingArraylist;
+    //private boolean isRecord = false;
     public NoteAudioRecord noteAudioRecord;
     private DetailNotePagerAdapter detailNotePagerAdapter;
 
@@ -41,7 +40,7 @@ public class RecordingFragment extends Fragment {
         recyclerViewRecordings.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
         recyclerViewRecordings.setHasFixedSize(false);
 
-        recordingArraylist = new ArrayList<Recording>();
+        ArrayList<Recording> recordingArraylist = new ArrayList<Recording>();
         noteAudioRecord = new NoteAudioRecord(getContext(), rootView, recyclerViewRecordings, recordingArraylist, noteId, detailNotePagerAdapter);
         noteAudioRecord.fetchRecordings();
 

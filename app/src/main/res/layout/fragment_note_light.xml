@@ -6,13 +6,6 @@
     android:orientation="vertical"
     tools:context=".Fragments.NoteLightFragment">
 
-<!--    <ImageView-->
-<!--        android:id="@+id/infoImageLight"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="200dp"-->
-<!--        android:background="@drawable/imageview_in_card_background"-->
-<!--        android:scaleType="centerCrop"/>-->
-
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

@@ -7,7 +7,6 @@ import android.support.v4.app.FragmentPagerAdapter;
 import com.kozyrev.jotdown_room.CustomViews.WrapContentHeightViewPager;
 import com.kozyrev.jotdown_room.Fragments.NotesFileFragment;
 import com.kozyrev.jotdown_room.Fragments.RecordingFragment;
-import com.kozyrev.jotdown_room.R;
 
 public class DetailNotePagerAdapter extends FragmentPagerAdapter {
 

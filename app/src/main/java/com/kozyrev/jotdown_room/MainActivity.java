@@ -25,14 +25,12 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.ArrayMap;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.support.v7.widget.SearchView;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 
 import androidx.recyclerview.selection.ItemDetailsLookup;
 import androidx.recyclerview.selection.OnDragInitiatedListener;
@@ -451,6 +449,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void updateAdapter(){
         setAdapterDataSet();
         CaptionedImagesAdapter adapter = (CaptionedImagesAdapter) notesRecycler.getAdapter();
+        assert adapter != null;
         adapter.updateNotesList(items);
     }
 
