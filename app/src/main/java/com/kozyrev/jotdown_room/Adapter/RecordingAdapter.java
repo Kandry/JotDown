@@ -16,8 +16,6 @@ import android.widget.TextView;
 
 import com.kozyrev.jotdown_room.Entities.Recording;
 import com.kozyrev.jotdown_room.R;
-import com.masoudss.lib.SeekBarOnProgressChanged;
-import com.masoudss.lib.WaveformSeekBar;
 
 import java.io.IOException;
 import java.util.ArrayList;

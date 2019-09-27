@@ -59,7 +59,7 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.subscribers.DisposableSubscriber;
 
-public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, SearchView.OnQueryTextListener{
+public class MainActivity extends AppCompatActivity implements SearchView.OnQueryTextListener {
 
     RecyclerView notesRecycler;
     Toolbar toolbar;
@@ -70,8 +70,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     ActionMode actionMode;
     Menu menu;
 
-    FrameLayout notesFrameLayout;
-    FrameLayout noteLightFragmentContainer;
+    FrameLayout notesFrameLayout, noteLightFragmentContainer;
     NoteLightFragment noteLightFragment;
 
     MenuItem itemSearch, itemChooseListView, itemSelectCount, itemClear, itemDelete;
@@ -104,19 +103,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         notesRecycler.setItemAnimator(new DefaultItemAnimator());
         notesRecycler.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));
 
-        notesFrameLayout = findViewById(R.id.notesFrameLayout);/*
-        notesFrameLayout.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                if (isSelected){
-                    FragmentManager fragmentManager = getSupportFragmentManager();
-                    FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                    fragmentTransaction.remove(noteLightFragment);
-                    fragmentTransaction.commit();
-                }
-                return false;
-            }
-        });*/
+        notesFrameLayout = findViewById(R.id.notesFrameLayout);
         noteLightFragmentContainer = findViewById(R.id.noteLightFragmentContainer);
     }
 
@@ -159,15 +146,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        return false;
-    }
-
     private void showPopupMenu(View v){
         PopupMenu popupMenu = new PopupMenu(this, v);
         popupMenu.inflate(R.menu.menu_choose_listview);
-
         popupMenu.setOnMenuItemClickListener(menuItem -> {
                 switch(menuItem.getItemId()) {
                     case R.id.menu_list_view:
@@ -186,6 +167,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 return true;
         });
         popupMenu.show();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        selectionTracker.onSaveInstanceState(outState);
     }
 
     @Override
@@ -236,12 +223,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction fragmentTransaction = fragmentBeginTransaction();
         removeFragment(fragmentTransaction);
         fragmentTransaction.commit();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        super.onSaveInstanceState(outState, outPersistentState);
-        selectionTracker.onSaveInstanceState(outState);
     }
 
     private void flowableAllNotes(){
@@ -341,7 +322,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onSelectionChanged() {
                 super.onSelectionChanged();
                 if(selectionTracker.hasSelection() && actionMode == null){
-                    actionMode = startSupportActionMode(new ActionModeController(MainActivity.this, selectionTracker));
+                    actionMode = startSupportActionMode(new ActionModeController(selectionTracker));
                     setMenuVisisble(true);
                     setMenuItemTitle(selectionTracker.getSelection().size());
                 } else if (!selectionTracker.hasSelection() && actionMode != null){

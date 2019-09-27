@@ -9,7 +9,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.design.widget.TextInputEditText;
 import android.support.transition.TransitionManager;
@@ -42,7 +41,7 @@ import io.reactivex.Single;
 import io.reactivex.SingleObserver;
 import io.reactivex.disposables.Disposable;
 
-public class DetailNoteActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class DetailNoteActivity extends AppCompatActivity {
 
     private static final int REQUEST_GALLERY = 200;
     private static final int START_CAMERA_APP = 201;
@@ -68,8 +67,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
 
     private int noteId;
     private String imageUriString, fileUriString = "";
-    private boolean notImageAdding = true;
-    private boolean isRecord = false;
+    private boolean /*notImageAdding = true,*/ isRecord = false;
     Uri originalUri, fileUri;
     private Date alarmTime = new Date();
 
@@ -96,9 +94,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                                                                                                         : -1);
 
         initAlarm();
-        downloadData();
 
         if (noteId < 0) noteId = (int) addNote();
+        else downloadData();
 
         initCamera();
 
@@ -110,9 +108,9 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     protected void onPause() {
         super.onPause();
 
-        if (notImageAdding){
+        //if (notImageAdding){
             updateNote();
-        }
+        //}
     }
     /* ------------------------------- Конец взаимодействий с жизненным циклом активности ------------------------------- */
 
@@ -208,11 +206,6 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-        return false;
-    }
     /* ------------------------------------ Конец взаимодействий с панелью приложения ----------------------------------- */
 
     /* ACTIVITY_CHOOSE ----------------------- Взаимодействия с активностью выбора -------------------------------------- */
@@ -220,7 +213,7 @@ public class DetailNoteActivity extends AppCompatActivity implements NavigationV
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
 
-        notImageAdding = true;
+        //notImageAdding = true;
 
         switch (requestCode){
             case REQUEST_GALLERY:
